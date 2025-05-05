@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { FaTimes } from 'react-icons/fa';
 import { createGroup } from '../store/actions/messengerAction';
+
+const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
 
 const GroupPopup = ({ onClose }) => {
   const dispatch = useDispatch();
@@ -24,7 +26,6 @@ const GroupPopup = ({ onClose }) => {
 
   const handleMemberToggle = friendId => {
     const updatedMembers = [...groupData.members];
-    
     if (updatedMembers.includes(friendId)) {
       // Remove if already selected
       const index = updatedMembers.indexOf(friendId);
@@ -33,7 +34,6 @@ const GroupPopup = ({ onClose }) => {
       // Add if not selected
       updatedMembers.push(friendId);
     }
-    
     setGroupData({
       ...groupData,
       members: updatedMembers
@@ -57,20 +57,19 @@ const GroupPopup = ({ onClose }) => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    
+
     if (!groupData.name || groupData.members.length === 0) {
       alert('Group name and at least one member are required');
       return;
     }
-    
+
     const formData = new FormData();
     formData.append('name', groupData.name);
     formData.append('members', JSON.stringify(groupData.members));
-    
     if (groupData.image) {
       formData.append('image', groupData.image);
     }
-    
+
     dispatch(createGroup(formData))
       .then(() => {
         onClose();
@@ -129,9 +128,12 @@ const GroupPopup = ({ onClose }) => {
                 >
                   <div className="member-image">
                     <img 
-                      src={`/image/${friend.fndInfo.image}`} 
+                      src={`${BACKEND_URL}/image/${friend.fndInfo.image}`} 
                       alt=""
-                      onError={e => { e.target.onerror = null; e.target.src = '/image/default-profile-picture1.png'; }}
+                      onError={e => { 
+                        e.target.onerror = null; 
+                        e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`; 
+                      }}
                     />
                   </div>
                   <div className="member-name">
