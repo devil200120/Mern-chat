@@ -17,7 +17,7 @@ router.get('/google', passport.authenticate('google', {
 // Updated Google callback route with JWT token implementation
 router.get('/google/callback', 
     passport.authenticate('google', { 
-        failureRedirect: 'http://localhost:3000/login'
+        failureRedirect: 'https://mern-chat-hk3u.onrender.com/login'
     }),
     (req, res) => {
         // Create a JWT token for the Google user - similar to regular login
@@ -36,7 +36,7 @@ router.get('/google/callback',
         res.cookie('authToken', token, options);
         
         // Redirect to frontend OAuth callback route
-        res.redirect(`http://localhost:3000/oauth-callback?token=${token}`);
+        res.redirect(`https://mern-chat-hk3u.onrender.com/oauth-callback?token=${token}`);
     }
 );
 // authRoute.js
