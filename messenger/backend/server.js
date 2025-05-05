@@ -14,9 +14,9 @@ const app = express();
 // Allowed Origins for CORS
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "http://localhost:8000",
   "http://localhost:5000",
+  "http://localhost:8000",
+  
   "http://127.0.0.1:8000",
   "https://mern-chat-hk3u.onrender.com"
 ];
@@ -24,7 +24,7 @@ const allowedOrigins = [
 // --- Middlewares ---
 app.use(cors({
   origin: allowedOrigins,
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH'],
   credentials: true
 }));
 app.use(bodyParser.json());
