@@ -71,7 +71,8 @@ const io = new Server(server, {
 });
 
 // --- Load Socket.IO logic ---
-require('C:/Users/KIIT0001/Desktop/Chat Application Excise File - Copy/messenger/socket/socket')(io);
+require('../socket/socket')(io);
+
 
 // --- Start Server ---
 const PORT = process.env.PORT || 5000;
