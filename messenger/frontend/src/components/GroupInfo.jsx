@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 const GroupInfo = ({ currentGroup }) => {
   const { friends } = useSelector(state => state.messenger);
   const { myInfo } = useSelector(state => state.auth);
+  const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
 
-  // Find member details from friends list
   const getMemberInfo = (memberId) => {
     if (memberId === myInfo.id) {
       return {
@@ -24,9 +24,16 @@ const GroupInfo = ({ currentGroup }) => {
       <div className='image-name'>
         <div className='image'>
           <img 
-            src={currentGroup.image ? `/image/${currentGroup.image}` : '/image/default-group.png'} 
+            src={
+              currentGroup.image 
+                ? `${BACKEND_URL}/image/${currentGroup.image}` 
+                : `${BACKEND_URL}/image/default-group.png`
+            } 
             alt=''
-            onError={e => { e.target.onerror = null; e.target.src = '/image/default-profile-picture1.png'; }}
+            onError={e => { 
+              e.target.onerror = null; 
+              e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`; 
+            }}
           />
         </div>
         <div className='name'>
@@ -49,9 +56,12 @@ const GroupInfo = ({ currentGroup }) => {
               <div key={memberId} className='member-item'>
                 <div className='member-image'>
                   <img 
-                    src={`/image/${member.image}`} 
+                    src={`${BACKEND_URL}/image/${member.image}`} 
                     alt=''
-                    onError={e => { e.target.onerror = null; e.target.src = '/image/default-profile-picture1.png'; }}
+                    onError={e => { 
+                      e.target.onerror = null; 
+                      e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`; 
+                    }}
                   />
                 </div>
                 <div className='member-name'>
