@@ -8,6 +8,9 @@ import {
   SET_USER
 } from "../types/authType";
 
+// Add this at the top (for easy URL management)
+const API_URL = 'https://mern-chat-application-nlxu.onrender.com';
+
 // Register
 export const userRegister = (data) => {
   return async (dispatch) => {
@@ -16,7 +19,7 @@ export const userRegister = (data) => {
         headers: { 'Content-Type': 'application/json' }
       };
 
-      const response = await axios.post('/api/messenger/user-register', data, config);
+      const response = await axios.post(`${API_URL}/api/messenger/user-register`, data, config);
       localStorage.setItem('authToken', response.data.token);
 
       dispatch({
@@ -45,7 +48,7 @@ export const userLogin = (data) => {
         headers: { 'Content-Type': 'application/json' }
       };
 
-      const response = await axios.post('/api/messenger/user-login', data, config);
+      const response = await axios.post(`${API_URL}/api/messenger/user-login`, data, config);
       localStorage.setItem('authToken', response.data.token);
 
       dispatch({
@@ -66,7 +69,7 @@ export const userLogin = (data) => {
   };
 };
 
-// Google Login
+// Google Login (no changes needed here)
 export const googleLogin = (token) => {
   return (dispatch) => {
     try {
@@ -87,7 +90,7 @@ export const googleLogin = (token) => {
 // Logout
 export const userLogout = () => async (dispatch) => {
   try {
-    const response = await axios.post('/api/messenger/user-logout');
+    const response = await axios.post(`${API_URL}/api/messenger/user-logout`);
     if (response.data.success) {
       localStorage.removeItem('authToken');
       dispatch({
