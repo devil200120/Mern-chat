@@ -117,7 +117,7 @@ const Messenger = () => {
 
   // Initialize socket connection ONCE
   useEffect(() => {
-    socket.current = io("http://localhost:5000", {
+    socket.current = io("https://mern-chat-application-nlxu.onrender.com", {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       autoConnect: true,
