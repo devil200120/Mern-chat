@@ -72,7 +72,7 @@ module.exports.userRegister = (req, res) => {
                 expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000),
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
             };
 
             res.status(201)
