@@ -4,6 +4,8 @@ import FriendInfo from './FriendInfo';
 import Message from './Message';
 import MessageSend from './MessageSend';
 
+const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com"
+
 const RightSide = (props) => {
   const {currentfriend, inputHendle, newMessage, sendMessage, message, scrollRef, emojiSend, ImageSend, activeUser, typingMessage, handleVideoCall} = props;
  
@@ -18,11 +20,11 @@ const RightSide = (props) => {
                                 <div className='image-name'>
                                     <div className='image'>
                                         <img 
-                                            src={`/image/${currentfriend.image}`} 
+                                            src={`${BACKEND_URL}/image/${currentfriend.image}`} 
                                             alt='' 
                                             onError={(e) => {
                                                 e.target.onerror = null;
-                                                e.target.src = '/image/default-profile-picture1.png';
+                                                e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`;
                                             }}
                                         />
 
