@@ -2,6 +2,8 @@ import React from "react";
 import moment from "moment";
 
 const Group = ({ group, setCurrentGroup, currentGroup }) => {
+  const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
+
   return (
     <div
       onClick={() => setCurrentGroup(group)}
@@ -11,12 +13,14 @@ const Group = ({ group, setCurrentGroup, currentGroup }) => {
         <div className="image">
           <img
             src={
-              group.image ? `/image/${group.image}` : "/image/default-group.png"
+              group.image 
+                ? `${BACKEND_URL}/image/${group.image}` 
+                : `${BACKEND_URL}/image/default-group.png`
             }
             alt=""
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/image/default-profile-picture1.png";
+              e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`;
             }}
           />
         </div>
