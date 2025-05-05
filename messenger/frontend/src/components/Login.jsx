@@ -128,7 +128,7 @@ const Login = () => {
           {/* RECOMMENDED: Server-side Google OAuth link */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
             <a
-              href="http://localhost:5000/api/messenger/google"
+              href="https://mern-chat-application-nlxu.onrender.com/api/messenger/google"
               className="google-signin-link"
               style={{
                 padding: "10px 20px",
