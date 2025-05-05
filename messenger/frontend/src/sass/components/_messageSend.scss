@@ -1,0 +1,324 @@
+.message-send-section {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background-color: #e0e5ec;
+  margin-top: auto; /* Ensures it sticks to bottom */
+  border-top: none;
+  box-shadow: 0 -4px 12px -6px #b8bac0;
+  z-index: 5;
+  
+  /* Hide all file inputs */
+  input[type="file"], 
+  #pic, 
+  #group-pic,
+  .hidden-file-input {
+    display: none !important;
+  }
+  
+  /* Hide emoji checkbox but keep its functionality */
+  #emoji, #emoji-group {
+    display: none;
+  }
+  
+  .file {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #e0e5ec;
+    box-shadow: 
+      4px 4px 12px #b8bac0,
+      -4px -4px 12px #ffffff;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      box-shadow: 
+        2px 2px 6px #b8bac0,
+        -2px -2px 6px #ffffff;
+      transform: translateY(-2px);
+    }
+    
+    &:active {
+      box-shadow: 
+        inset 2px 2px 6px #b8bac0,
+        inset -2px -2px 6px #ffffff;
+      transform: translateY(0);
+    }
+    
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      margin-bottom: 0;
+      cursor: pointer;
+      color: #3a3a3a;
+      font-size: 20px;
+    }
+    
+    .add-image, .add-attachment, .add-gift {
+      position: absolute; /* Changed from fixed to absolute */
+      padding: 8px 12px;
+      background: #e0e5ec;
+      font-size: 14px;
+      bottom: 60px;
+      opacity: 0;
+      visibility: hidden;
+      color: #3a3a3a;
+      border-radius: 12px;
+      box-shadow: 
+        4px 4px 12px #b8bac0,
+        -4px -4px 12px #ffffff;
+      transition: all 0.2s ease;
+      transform: translateY(10px);
+      z-index: 10;
+      white-space: nowrap;
+      
+      /* Add arrow pointing down */
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid #e0e5ec;
+      }
+    }
+  }
+  
+  .hover-attachment, .hover-image, .hover-gift {
+    position: relative;
+    margin-right: 8px;
+    
+    &:hover {
+      .add-attachment, .add-image, .add-gift {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  .message-type {
+    display: flex;
+    width: 70%;
+    height: 46px;
+    background-color: #e0e5ec;
+    border-radius: 50px;
+    border: none;
+    align-items: center;
+    box-shadow: 
+      inset 4px 4px 8px #b8bac0,
+      inset -4px -4px 8px #ffffff;
+    padding: 0 16px;
+    margin: 0 12px;
+    
+    .form-control {
+      width: 100%;
+      border-bottom-left-radius: 50px;
+      border-top-left-radius: 50px;
+      background-color: transparent;
+      border: none;
+      padding: 10px 0;
+      color: #3a3a3a;
+      
+      &:focus {
+        outline: none;
+      }
+      
+      &::placeholder {
+        color: #6c7a89;
+      }
+    }
+    
+    label {
+      font-size: 20px;
+      margin-right: 5px;
+      cursor: pointer;
+      color: #3a3a3a;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .emoji-section {
+    width: 280px;
+    background: #e0e5ec;
+    position: absolute;
+    right: 60px;
+    padding: 16px;
+    bottom: 70px;
+    border-radius: 16px;
+    box-shadow: 
+      6px 6px 16px #b8bac0,
+      -6px -6px 16px #ffffff;
+    display: none;
+    z-index: 10;
+    
+    /* Add arrow pointing down */
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      right: 30px;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid #e0e5ec;
+    }
+    
+    .emoji {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      
+      /* Scrollbar styling */
+      &::-webkit-scrollbar {
+        width: 6px;
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: #b8bac0;
+        border-radius: 3px;
+      }
+      
+      span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        
+        &:hover {
+          transform: scale(1.2);
+          background-color: rgba(255, 255, 255, 0.5);
+          box-shadow: 
+            2px 2px 5px #b8bac0,
+            -2px -2px 5px #ffffff;
+        }
+      }
+    }
+  }
+  
+  /* Show emoji section when checkbox is checked */
+  #emoji:checked ~ .emoji-section,
+  #emoji-group:checked ~ .emoji-section {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  /* File preview styling */
+  .file-preview-container {
+    position: absolute;
+    bottom: 70px;
+    left: 20px;
+    background: #e0e5ec;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 
+      4px 4px 12px #b8bac0,
+      -4px -4px 12px #ffffff;
+    
+    .file-preview-image {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+    
+    .remove-preview-button {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e0e5ec;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        3px 3px 6px #b8bac0,
+        -3px -3px 6px #ffffff;
+      cursor: pointer;
+      font-weight: bold;
+      
+      &:hover {
+        box-shadow: 
+          2px 2px 4px #b8bac0,
+          -2px -2px 4px #ffffff;
+      }
+    }
+  }
+}
+
+/* Animation for fade in effect */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animation for typing indicator */
+.typing-animation {
+  span {
+    opacity: 0;
+    animation: typingDot 1.4s infinite;
+    display: inline-block;
+  }
+  
+  span:nth-child(1) {
+    animation-delay: 0s;
+  }
+  span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes typingDot {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .message-send-section {
+    padding: 10px;
+    
+    .message-type {
+      width: 60%;
+      margin: 0 8px;
+    }
+    
+    .emoji-section {
+      width: 240px;
+      right: 20px;
+      
+      .emoji {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  }
+}

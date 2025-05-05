@@ -1,1 +1,5 @@
 node_modules
+messenger/backend/config/config.env
+messenger/socket/.env
+messenger/socket/.env
+messenger/frontend/.env

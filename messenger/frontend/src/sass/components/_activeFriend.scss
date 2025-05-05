@@ -1,0 +1,49 @@
+.active-friends {
+  padding: 10px 5px;
+  background-color: var(--base-color);
+  border-bottom: none;
+  box-shadow: 0 4px 8px -4px var(--shadow-dark);
+  
+  .active-friend {
+    overflow: hidden;
+    
+    .image-active-icon {
+      overflow-x: scroll;
+      display: flex;
+      padding: 5px 0;
+      
+      &::-webkit-scrollbar {
+        height: 0;
+        display: none;
+      }
+      
+      .image {
+        margin: 5px 8px;
+        position: relative;
+        
+        img {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          box-shadow: var(--neu-flat);
+          transition: transform 0.3s ease;
+          
+          &:hover {
+            transform: scale(1.08);
+          }
+        }
+        
+        .active-icon {
+          position: absolute;
+          bottom: 3px;
+          right: 3px;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background-color: rgb(27, 223, 53);
+          border: 2px solid var(--base-color);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,195 @@
+.chatbot-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #e9ecf4;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 0 18px #e3e8ef;
+  }
+  
+  .chatbot-header {
+    display: flex;
+    align-items: center;
+    padding: 1.2rem 2.2rem 1.2rem 1.7rem;
+    background: #fff;
+    border-bottom: 1px solid #f1f1f1;
+    gap: 1.1rem;
+  }
+  .chatbot-header-avatar {
+    background: #d3edfd;
+    color: #0084ff;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+  .chatbot-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .chatbot-status {
+    font-size: 0.97rem;
+    color: #4eca89;
+  }
+  .chatbot-clear-btn {
+    margin-left: auto;
+    background: #f3f3f6;
+    color: #222;
+    border: none;
+    border-radius: 0.9rem;
+    padding: 0.7rem 1.09rem;
+    font-size: 1.06rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover { background: #ffe1e1; color: #ac1b1b; }
+  }
+  
+  // Chat area
+  .chatbot-messages {
+    flex: 1 1 0;
+    overflow-y: auto;
+    padding: 1.8rem;
+    background: #e9ecf4;
+    display: flex;
+    flex-direction: column;
+  }
+  .chatbot-msg-row {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 1.2rem;
+  }
+  .chatbot-msg-row.msg-out { flex-direction: row-reverse; }
+  .chatbot-msg-row.msg-in { flex-direction: row; }
+  
+  .chatbot-msg-avatar {
+    width: 38px;
+    height: 38px;
+    background: #d3edfd;
+    color: #0084ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.18rem;
+    margin: 0 0.7rem;
+  }
+  .chatbot-bubble {
+    max-width: 68vw;
+    min-width: 80px;
+    padding: 1.07rem 1.25rem;
+    border-radius: 1.15rem;
+    margin-bottom: 0.2rem;
+    font-size: 1.13rem;
+    line-height: 1.47;
+    box-shadow: 0 1px 8px #e1e8ed;
+  
+    &.user {
+      background: #0084ff;
+      color: #fff;
+      border-bottom-right-radius: 6px;
+      align-self: flex-end;
+    }
+    &.bot {
+      background: #fefefe;
+      color: #333;
+      border-bottom-left-radius: 6px;
+      align-self: flex-start;
+      border: 1px solid #daeaf7;
+    }
+  }
+  .chatbot-time {
+    font-size: 0.91rem;
+    color: #b2bac6;
+    margin-top: 3px;
+    text-align: right;
+  }
+  
+  // Empty state
+  .chatbot-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto;
+    text-align: center;
+    color: #7c8694;
+  }
+  .chatbot-avatar-xl {
+    background: #d3edfd;
+    color: #0084ff;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    margin-bottom: 12px;
+  }
+  .chatbot-empty-title {
+    font-weight: 700;
+    font-size: 1.19rem;
+    margin-bottom: 5px;
+  }
+  .chatbot-empty-desc {
+    font-size: 1.05rem;
+    margin-bottom: 7px;
+  }
+  .chatbot-examples {
+    margin-top: 7px;
+    font-size: 0.97rem;
+    list-style: disc inside;
+    li { margin-bottom: 4px; }
+  }
+  
+  // Input
+  .chatbot-input-row {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 1rem 2.2rem 1rem 1.7rem;
+    border-top: 1px solid #f1f1f1;
+    gap: 0.7rem;
+  }
+  .chatbot-icon-btn {
+    background: none;
+    border: none;
+    color: #b6bfca;
+    font-size: 1.28rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    .chatbot-file-input { display: none; }
+    label { cursor: pointer; margin-bottom: 0; }
+  }
+  .chatbot-input {
+    flex: 1;
+    border: none;
+    background: #f4f6fa;
+    border-radius: 1.05rem;
+    padding: 0.9rem 1.24rem;
+    font-size: 1.13rem;
+    outline: none;
+    color: #23272f;
+    margin: 0 0.35rem;
+  }
+  .chatbot-send-btn {
+    background: #0084ff;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.21rem;
+    cursor: pointer;
+    transition: background 0.22s;
+    &:hover { background: #006edc; }
+  }
+  

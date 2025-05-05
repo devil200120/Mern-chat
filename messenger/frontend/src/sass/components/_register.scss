@@ -1,0 +1,462 @@
+// Premium Animated Neumorphism Registration Form
+.register {
+    width: 100vw;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #b6e0fe 0%, #89f7fe 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+    position: relative;
+    overflow: hidden;
+    
+    // Animated background elements
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.4;
+      z-index: 0;
+    }
+    
+    &::before {
+      width: 40vw;
+      height: 40vw;
+      background: linear-gradient(135deg, #b6e0fe 0%, #fbc2eb 100%);
+      top: -15vw;
+      left: -15vw;
+      animation: float-blob 18s ease-in-out infinite alternate;
+    }
+    
+    &::after {
+      width: 35vw;
+      height: 35vw;
+      background: linear-gradient(135deg, #fbc2eb 0%, #89f7fe 100%);
+      bottom: -15vw;
+      right: -15vw;
+      animation: float-blob 15s ease-in-out infinite alternate-reverse;
+    }
+  
+    .card {
+      background: #e0e5ec;
+      border-radius: 32px;
+      box-shadow:
+        12px 12px 30px #b8bac0,
+        -12px -12px 30px #ffffff;
+      padding: 2.5rem 2rem 2rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: card-appear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      
+      // Animated border glow
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        z-index: -1;
+        border-radius: 35px;
+        background: linear-gradient(120deg, #b6e0fe, #fbc2eb, #89f7fe, #b6e0fe);
+        background-size: 300% 300%;
+        animation: gradient-shift 8s ease infinite;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+  
+      &:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow:
+          16px 16px 40px #b8bac0,
+          -16px -16px 40px #ffffff;
+          
+        &::before {
+          opacity: 0.6;
+        }
+      }
+  
+      .card-header {
+        margin-bottom: 2.5rem;
+        animation: slide-down 0.6s 0.2s both;
+        
+        h3 {
+          text-align: center;
+          color: #3a3a3a;
+          font-size: 2.2rem;
+          font-weight: 800;
+          letter-spacing: 1.2px;
+          margin: 0;
+          text-shadow: 1px 1px 2px #ffffff, -1px -1px 2px #b8bac0;
+          position: relative;
+          background: linear-gradient(135deg, #3a3a3a 0%, #6c7a89 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          
+          &::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            margin: 16px auto 0;
+            background: linear-gradient(90deg, #89f7fe 0%, #fbc2eb 100%);
+            border-radius: 2px;
+            transform-origin: center;
+            animation: line-appear 0.6s 0.8s both;
+            transition: width 0.3s, transform 0.3s;
+          }
+          
+          &:hover::after {
+            width: 120px;
+            transform: translateY(2px);
+          }
+        }
+      }
+  
+      .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        padding: 0;
+  
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+          margin-bottom: 1.2rem;
+          position: relative;
+          opacity: 0;
+          animation: slide-up 0.5s forwards;
+          
+          @for $i from 1 through 5 {
+            &:nth-child(#{$i}) {
+              animation-delay: #{0.2 + $i * 0.1}s;
+            }
+          }
+  
+          label {
+            color: #6c7a89;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            transition: color 0.3s, transform 0.3s;
+          }
+  
+          .form-control {
+            background: #e0e5ec;
+            border: none;
+            border-radius: 16px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            color: #3a3a3a;
+            box-shadow:
+              inset 5px 5px 10px #b8bac0,
+              inset -5px -5px 10px #ffffff;
+            transition: all 0.3s;
+            transform-origin: center;
+  
+            &::placeholder {
+              color: #b8bac0;
+              transition: opacity 0.3s;
+            }
+  
+            &:focus {
+              outline: none;
+              background: #f0f2f5;
+              transform: scale(1.02);
+              box-shadow:
+                0 0 0 3px #89f7fe55,
+                inset 3px 3px 6px #b8bac0,
+                inset -3px -3px 6px #ffffff;
+              animation: pulse 1.5s infinite;
+              
+              & + label {
+                color: #219ebc;
+                transform: translateY(-2px);
+              }
+              
+              &::placeholder {
+                opacity: 0.5;
+              }
+            }
+          }
+  
+          &:last-child {
+            margin-bottom: 0;
+          }
+  
+          span {
+            text-align: center;
+            font-size: 0.98rem;
+            color: #6c7a89;
+            margin-top: 0.5rem;
+            a {
+              color: #219ebc;
+              text-decoration: underline;
+              font-weight: 600;
+              transition: all 0.3s;
+              position: relative;
+              
+              &::before {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(90deg, #89f7fe 0%, #fbc2eb 100%);
+                transform: scaleX(0);
+                transform-origin: right;
+                transition: transform 0.3s ease;
+              }
+              
+              &:hover {
+                color: #fbc2eb;
+                text-shadow: 0 0 10px #fbc2eb55;
+                
+                &::before {
+                  transform: scaleX(1);
+                  transform-origin: left;
+                }
+              }
+            }
+          }
+  
+          .file-image {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+  
+            .image {
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+              border: 2px solid #b6e0fe;
+              background: #e0e5ec;
+              overflow: hidden;
+              box-shadow:
+                3px 3px 6px #b8bac0,
+                -3px -3px 6px #ffffff;
+              transition: all 0.3s;
+              
+              &:hover {
+                transform: scale(1.1) rotate(5deg);
+                border-color: #fbc2eb;
+              }
+              
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s;
+                
+                &:hover {
+                  transform: scale(1.1);
+                }
+              }
+            }
+  
+            .file {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+  
+              .form-control {
+                
+                display: none;
+              }
+  
+              label {
+                background: linear-gradient(90deg, #89f7fe 0%, #fbc2eb 100%);
+                color: #3a3a3a;
+                border-radius: 25px;
+                padding: 0.6rem 1.4rem;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 600;
+                box-shadow:
+                  3px 3px 10px #b8bac0,
+                  -3px -3px 10px #ffffff;
+                border: none;
+                margin-left: 0;
+                transition: all 0.3s;
+                position: relative;
+                overflow: hidden;
+                
+                &::before {
+                  content: '';
+                  position: absolute;
+                  top: 0;
+                  left: -100%;
+                  width: 100%;
+                  height: 100%;
+                  background: rgba(255, 255, 255, 0.2);
+                  transform: skewX(-30deg);
+                  transition: all 0.5s;
+                }
+                
+                &:hover {
+                  background: linear-gradient(90deg, #fbc2eb 0%, #89f7fe 100%);
+                  color: #219ebc;
+                  transform: translateY(-3px);
+                  box-shadow:
+                    5px 5px 15px #b8bac0,
+                    -5px -5px 15px #ffffff;
+                    
+                  &::before {
+                    left: 100%;
+                  }
+                }
+                
+                &:active {
+                  transform: translateY(1px);
+                  box-shadow:
+                    2px 2px 5px #b8bac0,
+                    -2px -2px 5px #ffffff;
+                }
+              }
+            }
+          }
+        }
+      }
+  
+      .login-btn {
+        margin-top: 2rem;
+        padding: 1.1rem 0;
+        border-radius: 16px;
+        border: none;
+        background: #e0e5ec;
+        color: #219ebc;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        box-shadow:
+          5px 5px 15px #b8bac0,
+          -5px -5px 15px #ffffff;
+        cursor: pointer;
+        transition: all 0.4s;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        opacity: 0;
+        animation: slide-up 0.5s 0.9s forwards;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, #89f7fe 0%, #fbc2eb 100%);
+          z-index: -1;
+          transition: transform 0.6s cubic-bezier(.8, 0, .2, 1);
+          transform: scaleX(0);
+          transform-origin: right;
+        }
+        
+        &:hover {
+          color: #fff;
+          transform: translateY(-5px) scale(1.02);
+          letter-spacing: 3px;
+          box-shadow:
+            8px 8px 24px #b8bac0,
+            -8px -8px 24px #ffffff;
+            
+          &::before {
+            transform: scaleX(1);
+            transform-origin: left;
+          }
+        }
+        
+        &:active {
+          transform: translateY(2px) scale(0.98);
+          box-shadow:
+            3px 3px 8px #b8bac0,
+            -3px -3px 8px #ffffff;
+        }
+      }
+    }
+  
+    // Keyframe Animations
+    @keyframes float-blob {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(40px) scale(1.05); }
+    }
+    
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes card-appear {
+      0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    @keyframes slide-up {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slide-down {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes line-appear {
+      0% { transform: scaleX(0); opacity: 0; }
+      100% { transform: scaleX(1); opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(137, 247, 254, 0.4), inset 3px 3px 6px #b8bac0, inset -3px -3px 6px #ffffff; }
+      70% { box-shadow: 0 0 0 8px rgba(137, 247, 254, 0), inset 3px 3px 6px #b8bac0, inset -3px -3px 6px #ffffff; }
+      100% { box-shadow: 0 0 0 0 rgba(137, 247, 254, 0), inset 3px 3px 6px #b8bac0, inset -3px -3px 6px #ffffff; }
+    }
+  
+    // Responsive
+    @media (max-width: 600px) {
+      .card {
+        padding: 1.5rem 1rem;
+        border-radius: 24px;
+        max-width: 92vw;
+        
+        &::before {
+          border-radius: 26px;
+        }
+      }
+      
+      .card-header h3 {
+        font-size: 1.6rem;
+      }
+      
+      .form-group label {
+        font-size: 0.9rem;
+      }
+      
+      .login-btn {
+        padding: 0.9rem 0;
+        font-size: 1.05rem;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .card-header h3 {
+        font-size: 1.4rem;
+      }
+      
+      .form-group .file-image {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+    }
+  }
+  
