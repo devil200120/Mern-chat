@@ -3,20 +3,19 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { FaRegCheckCircle } from "react-icons/fa";
 
-const DEFAULT_AVATAR = '/image/default-profile-picture1.png';
+const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
+const DEFAULT_AVATAR = `${BACKEND_URL}/image/default-profile-picture1.png`;
 
 const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
   const { myInfo } = useSelector(state => state.auth);
   const containerRef = useRef(null);
 
-  // Scroll to bottom on new messages or typing
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [message, typingMessage]);
 
-  // Format timestamp for display
   const formatTimestamp = (timestamp) => {
     const messageDate = moment(timestamp);
     const now = moment();
@@ -29,7 +28,6 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
     }
   };
 
-  // Render image with fallback
   const renderImage = (src, alt = 'Shared image') => (
     <img
       src={src}
@@ -39,19 +37,18 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
     />
   );
 
-  // Render message content (text or image)
+  // Use backend URL for all images!
   const renderMessageContent = (m) =>
     m.message.text
       ? m.message.text
-      : renderImage(`/image/${m.message.image}`);
+      : renderImage(`${BACKEND_URL}/image/${m.message.image}`);
 
-  // Render message status for the last sent message
   const renderStatus = (m) => (
     <div className="message-status">
       {m.status === 'seen' ? (
         <img
           className="status-avatar"
-          src={`/image/${currentfriend.image}`}
+          src={`${BACKEND_URL}/image/${currentfriend.image}`}
           alt='Seen'
           onError={e => { e.target.onerror = null; e.target.src = DEFAULT_AVATAR; }}
         />
@@ -95,7 +92,7 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
                 className='fd-message'
               >
                 <div className='image-message-time'>
-                  {renderImage(`/image/${currentfriend.image}`, currentfriend.userName)}
+                  {renderImage(`${BACKEND_URL}/image/${currentfriend.image}`, currentfriend.userName)}
                   <div className='message-time'>
                     <div className='fd-text'>
                       <p className='message-text'>{renderMessageContent(m)}</p>
@@ -108,7 +105,7 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
           })
         ) : (
           <div className='friend_connect'>
-            {renderImage(`/image/${currentfriend.image}`, currentfriend.userName)}
+            {renderImage(`${BACKEND_URL}/image/${currentfriend.image}`, currentfriend.userName)}
             <h3>{currentfriend.userName} Connect You</h3>
             <span>
               {moment(currentfriend.createdAt).fromNow()}
@@ -122,13 +119,12 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
         <div className='typing-message'>
           <div className='fd-message'>
             <div className='image-message-time'>
-              {renderImage(`/image/${currentfriend.image}`, currentfriend.userName)}
+              {renderImage(`${BACKEND_URL}/image/${currentfriend.image}`, currentfriend.userName)}
               <div className='message-time'>
                 <div className='fd-text'>
-                <p className="message-text typing-animation">
-  Typing<span>.</span><span>.</span><span>.</span>
-</p>
-
+                  <p className="message-text typing-animation">
+                    Typing<span>.</span><span>.</span><span>.</span>
+                  </p>
                 </div>
               </div>
             </div>
