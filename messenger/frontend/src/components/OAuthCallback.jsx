@@ -10,61 +10,209 @@ const OAuthCallback = () => {
   const dispatch = useDispatch();
   const alert = useAlert();
   const [isProcessing, setIsProcessing] = useState(true);
-  
-  // Get authentication state from Redux
   const { authenticate } = useSelector(state => state.auth);
 
-  // Process the token from URL
+  // Token processing effect
   useEffect(() => {
-    if (!isProcessing) return;
-    
-    const params = new URLSearchParams(location.search);
-    const token = params.get("token");
+    const processToken = async () => {
+      try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get("token");
 
-    if (token) {
-      // Store token in localStorage
-      localStorage.setItem("authToken", token);
-      
-      // Dispatch login success action
-      dispatch({
-        type: USER_LOGIN_SUCCESS,
-        payload: {
-          token,
-          successMessage: "Successfully logged in with Google"
+        if (!token) {
+          throw new Error("No authentication token found");
         }
-      });
-      
-      alert.success("Successfully logged in with Google");
-      
-      // Mark processing as complete but don't navigate yet
-      setIsProcessing(false);
-    } else {
-      alert.error("Authentication failed");
-      navigate("/messenger/login");
-    }
-  }, [dispatch, location, alert, navigate, isProcessing]);
 
-  // Monitor authentication state and redirect when it changes
+        localStorage.setItem("authToken", token);
+        
+        dispatch({
+          type: USER_LOGIN_SUCCESS,
+          payload: {
+            token,
+            successMessage: "Google authentication successful"
+          }
+        });
+
+        alert.success("Successfully logged in with Google");
+      } catch (error) {
+        console.error("OAuth processing error:", error);
+        alert.error(error.message || "Authentication failed");
+        navigate("/messenger/login", { replace: true });
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    if (isProcessing) {
+      processToken();
+    }
+  }, [dispatch, location.search, alert, navigate, isProcessing]);
+
+  // Authentication success effect
   useEffect(() => {
+    let redirectTimer;
+    
     if (!isProcessing && authenticate) {
-      // Add a small delay to ensure Redux state is fully propagated
-      setTimeout(() => {
-        navigate("/");
+      redirectTimer = setTimeout(() => {
+        navigate("/", { replace: true });
       }, 300);
     }
+
+    return () => {
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
   }, [authenticate, isProcessing, navigate]);
 
   return (
-    <div className="oauth-callback" style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "100vh",
-      textAlign: "center"
-    }}>
-      <h2>Completing your sign-in...</h2>
-      <p>Please wait while we finish authenticating you.</p>
+    <div 
+      className="oauth-callback"
+      role="status"
+      aria-live="polite"
+      aria-busy={isProcessing}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        padding: "2rem",
+        textAlign: "center",
+        backgroundColor: "#f8f9fa",
+        fontFamily: "'Segoe UI', system-ui, sans-serif"
+      }}
+    >
+      <div className="loading-indicator" style={{ marginBottom: "1.5rem" }}>
+        <div 
+          className="spinner"
+          style={{
+            width: "3rem",
+            height: "3rem",
+            border: "0.25em solid currentColor",
+            borderRightColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.75s linear infinite"
+          }}
+          aria-hidden="true"
+        />
+      </div>
+      <h2 style={{ marginBottom: "0.5rem", color: "#2d3436" }}>
+        {isProcessing ? "Finalizing Authentication" : "Authentication Successful"}
+      </h2>
+      <p style={{ color: "#636e72", fontSize: "1.1rem" }}>
+        {isProcessing 
+          ? "Please wait while we secure your session..."
+          : "Redirecting to your dashboard..."}
+      </p>
+    </div>
+  );
+};
+
+export default OAuthCallback;
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { USER_LOGIN_SUCCESS } from "../store/types/authType";
+import { useAlert } from "react-alert";
+
+const OAuthCallback = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const alert = useAlert();
+  const [isProcessing, setIsProcessing] = useState(true);
+  const { authenticate } = useSelector(state => state.auth);
+
+  // Token processing effect
+  useEffect(() => {
+    const processToken = async () => {
+      try {
+        const params = new URLSearchParams(location.search);
+        const token = params.get("token");
+
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        localStorage.setItem("authToken", token);
+        
+        dispatch({
+          type: USER_LOGIN_SUCCESS,
+          payload: {
+            token,
+            successMessage: "Google authentication successful"
+          }
+        });
+
+        alert.success("Successfully logged in with Google");
+      } catch (error) {
+        console.error("OAuth processing error:", error);
+        alert.error(error.message || "Authentication failed");
+        navigate("/messenger/login", { replace: true });
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    if (isProcessing) {
+      processToken();
+    }
+  }, [dispatch, location.search, alert, navigate, isProcessing]);
+
+  // Authentication success effect
+  useEffect(() => {
+    let redirectTimer;
+    
+    if (!isProcessing && authenticate) {
+      redirectTimer = setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 300);
+    }
+
+    return () => {
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
+  }, [authenticate, isProcessing, navigate]);
+
+  return (
+    <div 
+      className="oauth-callback"
+      role="status"
+      aria-live="polite"
+      aria-busy={isProcessing}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        padding: "2rem",
+        textAlign: "center",
+        backgroundColor: "#f8f9fa",
+        fontFamily: "'Segoe UI', system-ui, sans-serif"
+      }}
+    >
+      <div className="loading-indicator" style={{ marginBottom: "1.5rem" }}>
+        <div 
+          className="spinner"
+          style={{
+            width: "3rem",
+            height: "3rem",
+            border: "0.25em solid currentColor",
+            borderRightColor: "transparent",
+            borderRadius: "50%",
+            animation: "spin 0.75s linear infinite"
+          }}
+          aria-hidden="true"
+        />
+      </div>
+      <h2 style={{ marginBottom: "0.5rem", color: "#2d3436" }}>
+        {isProcessing ? "Finalizing Authentication" : "Authentication Successful"}
+      </h2>
+      <p style={{ color: "#636e72", fontSize: "1.1rem" }}>
+        {isProcessing 
+          ? "Please wait while we secure your session..."
+          : "Redirecting to your dashboard..."}
+      </p>
     </div>
   );
 };
