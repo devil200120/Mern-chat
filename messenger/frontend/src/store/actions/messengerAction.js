@@ -1,252 +1,250 @@
 import axios from 'axios';
 import {
-    FRIEND_GET_SUCCESS,
-    MESSAGE_GET_SUCCESS,
-    MESSAGE_SEND_SUCCESS,
-    THEME_GET_SUCCESS,
-    THEME_SET_SUCCESS,
-    // Add new chatbot action types
-    FETCH_CHATBOT_MESSAGES,
-    CHATBOT_MESSAGE_SEND_SUCCESS,
-    CLEAR_CHATBOT_MESSAGES
+  FRIEND_GET_SUCCESS,
+  MESSAGE_GET_SUCCESS,
+  MESSAGE_SEND_SUCCESS,
+  THEME_GET_SUCCESS,
+  THEME_SET_SUCCESS,
+  // Group types
+  GROUP_GET_SUCCESS,
+  GROUP_CREATE_SUCCESS,
+  GROUP_MESSAGES_GET_SUCCESS,
+  GROUP_MESSAGE_SEND_SUCCESS,
+  // Chatbot types
+  FETCH_CHATBOT_MESSAGES,
+  CHATBOT_MESSAGE_SEND_SUCCESS,
+  CLEAR_CHATBOT_MESSAGES
 } from "../types/messengerType";
-const API_URL = "https://mern-chat-application-nlxu.onrender.com"
-export const getFriends = () => async(dispatch) => {
-     try{
-          const response = await axios.get(`${API_URL}/api/messenger/get-friends`);
-           dispatch({
-                type: FRIEND_GET_SUCCESS,
-                payload : {
-                     friends : response.data.friends
-                }
-           })
 
-     }catch (error){
-          console.log(error.response.data);
-     }
-}
+// API base URL (use environment variable or fallback)
+const API_URL = process.env.REACT_APP_API_URL || 'https://mern-chat-hk3u.onrender.com';
 
-export const messageSend = (data) => async(dispatch) => {
-    try{
-     const response = await axios.post(`${API_URL}/api/messenger/send-message`,data);
-     dispatch({
-          type : MESSAGE_SEND_SUCCESS,
-          payload : {
-               message : response.data.message
-          }
-     })
-    }catch (error){
-     console.log(error.response.data);
-    }
-}
+// Axios instance with credentials and token support
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
+// Attach token to every request if available
+axiosInstance.interceptors.request.use(config => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-export const getMessage = (id) => {
-     return async(dispatch) => {
-          try{
-               const response = await axios.get(`${API_URL}/api/messenger/get-message/${id}`)
-              dispatch({
-                   type : MESSAGE_GET_SUCCESS,
-                   payload : {
-                    message : response.data.message
-                   }
-              })
-          }catch (error){
-               console.log(error.response.data)
-          }
-     }
-}
+// Centralized error handler
+const handleError = (error) => {
+  const errorMessage = error.response?.data?.errorMessage ||
+    error.response?.data?.message ||
+    'Something went wrong. Please try again.';
+  return Array.isArray(errorMessage) ? errorMessage : [errorMessage];
+};
 
+// --- FRIENDS ---
 
-export const ImageMessageSend = (data) => async(dispatch)=>{
+export const getFriends = () => async (dispatch) => {
+  try {
+    const response = await axiosInstance.get('/api/messenger/get-friends');
+    dispatch({
+      type: FRIEND_GET_SUCCESS,
+      payload: { friends: response.data.friends }
+    });
+  } catch (error) {
+    dispatch({
+      type: FRIEND_GET_SUCCESS,
+      payload: { friends: [], error: handleError(error) }
+    });
+  }
+};
 
-     try{
-          const response = await axios.post(`${API_URL}/api/messenger/image-message-send`,data);
-          dispatch({
-               type: MESSAGE_SEND_SUCCESS,
-               payload : {
-                    message : response.data.message
-               }
-          })
-     }catch (error){
-          console.log(error.response.data);
+// --- MESSAGES ---
 
-     }
+export const messageSend = (data) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post('/api/messenger/send-message', data);
+    dispatch({
+      type: MESSAGE_SEND_SUCCESS,
+      payload: { message: response.data.message }
+    });
+    return response.data.message;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
 
-}
+export const getMessage = (id) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.get(`/api/messenger/get-message/${id}`);
+    dispatch({
+      type: MESSAGE_GET_SUCCESS,
+      payload: { message: response.data.message }
+    });
+  } catch (error) {
+    dispatch({
+      type: MESSAGE_GET_SUCCESS,
+      payload: { message: [], error: handleError(error) }
+    });
+  }
+};
 
-export const seenMessage = (msg) => async(dispatch)=> {
-     try{
-          const response = await axios.post(`${API_URL}/api/messenger/seen-message`,msg);
-          console.log(response.data);
-     }catch (error){
-          console.log(error.response.message)
+export const ImageMessageSend = (data) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post('/api/messenger/image-message-send', data);
+    dispatch({
+      type: MESSAGE_SEND_SUCCESS,
+      payload: { message: response.data.message }
+    });
+    return response.data.message;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
 
-     }
-}
+export const seenMessage = (msg) => async (dispatch) => {
+  try {
+    await axiosInstance.post('/api/messenger/seen-message', msg);
+  } catch (error) {
+    console.error('Seen message error:', handleError(error));
+  }
+};
 
+export const updateMessage = (msg) => async (dispatch) => {
+  try {
+    await axiosInstance.post('/api/messenger/delivared-message', msg);
+  } catch (error) {
+    console.error('Update message error:', handleError(error));
+  }
+};
 
-export const updateMessage = (msg) => async(dispatch)=> {
-     try{
-          const response = await axios.post(`${API_URL}/api/messenger/delivared-message`,msg);
-          console.log(response.data);
-     }catch (error){
-          console.log(error.response.message)
+// --- THEME ---
 
-     }
-}
+export const getTheme = () => (dispatch) => {
+  const theme = localStorage.getItem('theme') || 'white';
+  dispatch({
+    type: THEME_GET_SUCCESS,
+    payload: { theme }
+  });
+};
 
+export const themeSet = (theme) => (dispatch) => {
+  localStorage.setItem('theme', theme);
+  dispatch({
+    type: THEME_SET_SUCCESS,
+    payload: { theme }
+  });
+};
 
-export const getTheme = () => async(dispatch) => {
+// --- GROUPS ---
 
-     const theme = localStorage.getItem('theme');
-     dispatch({
-          type: "THEME_GET_SUCCESS",
-          payload : {
-               theme : theme? theme : 'white'
-          }
-     })
-
-}
-
-
-export const themeSet = (theme) => async(dispatch) => {
-
-     localStorage.setItem('theme',theme);
-     dispatch({
-          type: "THEME_SET_SUCCESS",
-          payload : {
-               theme : theme
-          }
-     })
-     
-}
-// Get user groups
 export const getGroups = () => async (dispatch) => {
-     try {
-       const response = await axios.get(`${API_URL}/api/messenger/get-groups`);
-       dispatch({
-         type: 'GET_GROUPS_SUCCESS',
-         payload: {
-           groups: response.data.groups
-         }
-       });
-     } catch (error) {
-       console.log(error.response.data);
-     }
-   };
-   
-   // Create new group
-   export const createGroup = (groupData) => async (dispatch) => {
-     try {
-       const response = await axios.post(`${API_URL}/api/messenger/create-group`, groupData);
-       dispatch({
-         type: 'CREATE_GROUP_SUCCESS',
-         payload: {
-           group: response.data.group
-         }
-       });
-       return response.data.group;
-     } catch (error) {
-       console.log(error.response.data);
-     }
-   };
-   
-   // Get messages for a group
-   export const getGroupMessages = (groupId) => async (dispatch) => {
-     try {
-       const response = await axios.get(`${API_URL}/api/messenger/get-group-messages/${groupId}`);
-       dispatch({
-         type: 'GET_GROUP_MESSAGES_SUCCESS',
-         payload: {
-           messages: response.data.messages
-         }
-       });
-     } catch (error) {
-       console.log(error.response.data);
-     }
-   };
-   
-   // Send message to a group
-   export const sendGroupMessage = (data) => async (dispatch) => {
-     try {
-       const response = await axios.post(`${API_URL}/api/messenger/send-group-message`, data);
-       dispatch({
-         type: 'SEND_GROUP_MESSAGE_SUCCESS',
-         payload: {
-           message: response.data.message
-         }
-       });
-     } catch (error) {
-       console.log(error.response.data);
-     }
-   };
-   
-   // Send image message to a group
-   export const sendGroupImageMessage = (data) => async (dispatch) => {
-     try {
-       const response = await axios.post(`${API_URL}/api/messenger/send-group-image-message`, data);
-       dispatch({
-         type: 'SEND_GROUP_MESSAGE_SUCCESS',
-         payload: {
-           message: response.data.message
-         }
-       });
-     } catch (error) {
-       console.log(error.response.data);
-     }
-   };
-
-// CHATBOT ACTIONS
-
-// Get Chatbot Messages
-export const getChatbotMessages = () => {
-  return async (dispatch) => {
-    try {
-      const response = await axios.get(`${API_URL}/api/messenger/chatbot/get-history`);
-      dispatch({
-        type: FETCH_CHATBOT_MESSAGES,
-        payload: { 
-          messages: response.data.messages 
-        }
-      });
-    } catch (error) {
-      console.log(error.response?.data || error.message);
-    }
+  try {
+    const response = await axiosInstance.get('/api/messenger/get-groups');
+    dispatch({
+      type: GROUP_GET_SUCCESS,
+      payload: { groups: response.data.groups }
+    });
+  } catch (error) {
+    dispatch({
+      type: GROUP_GET_SUCCESS,
+      payload: { groups: [], error: handleError(error) }
+    });
   }
-}
+};
 
-// Send Message to Chatbot
-export const sendChatbotMessage = (message) => {
-  return async (dispatch) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/messenger/chatbot/send-message`, { message });
-      dispatch({
-        type: CHATBOT_MESSAGE_SEND_SUCCESS,
-        payload: { 
-          message: response.data.message 
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.log(error.response?.data || error.message);
-      return { success: false, error: error.message };
-    }
+export const createGroup = (groupData) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post('/api/messenger/create-group', groupData);
+    dispatch({
+      type: GROUP_CREATE_SUCCESS,
+      payload: { group: response.data.group }
+    });
+    return response.data.group;
+  } catch (error) {
+    throw handleError(error);
   }
-}
+};
 
-// Clear Chatbot Conversation
-export const clearChatbotConversation = () => {
-  return async (dispatch) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/messenger/chatbot/clear-conversation`);
-      dispatch({
-        type: CLEAR_CHATBOT_MESSAGES
-      });
-      return response.data;
-    } catch (error) {
-      console.log(error.response?.data || error.message);
-      return { success: false, error: error.message };
-    }
+export const getGroupMessages = (groupId) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.get(`/api/messenger/get-group-messages/${groupId}`);
+    dispatch({
+      type: GROUP_MESSAGES_GET_SUCCESS,
+      payload: { messages: response.data.messages }
+    });
+  } catch (error) {
+    dispatch({
+      type: GROUP_MESSAGES_GET_SUCCESS,
+      payload: { messages: [], error: handleError(error) }
+    });
   }
-}
+};
+
+export const sendGroupMessage = (data) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post('/api/messenger/send-group-message', data);
+    dispatch({
+      type: GROUP_MESSAGE_SEND_SUCCESS,
+      payload: { message: response.data.message }
+    });
+    return response.data.message;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const sendGroupImageMessage = (data) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post('/api/messenger/send-group-image-message', data);
+    dispatch({
+      type: GROUP_MESSAGE_SEND_SUCCESS,
+      payload: { message: response.data.message }
+    });
+    return response.data.message;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+// --- CHATBOT ---
+
+export const getChatbotMessages = () => async (dispatch) => {
+  try {
+    const response = await axiosInstance.get('/api/messenger/chatbot/get-history');
+    dispatch({
+      type: FETCH_CHATBOT_MESSAGES,
+      payload: { messages: response.data.messages }
+    });
+  } catch (error) {
+    dispatch({
+      type: FETCH_CHATBOT_MESSAGES,
+      payload: { messages: [], error: handleError(error) }
+    });
+  }
+};
+
+export const sendChatbotMessage = (message) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post('/api/messenger/chatbot/send-message', { message });
+    dispatch({
+      type: CHATBOT_MESSAGE_SEND_SUCCESS,
+      payload: { message: response.data.message }
+    });
+    return response.data;
+  } catch (error) {
+    throw handleError(error);
+  }
+};
+
+export const clearChatbotConversation = () => async (dispatch) => {
+  try {
+    await axiosInstance.post('/api/messenger/chatbot/clear-conversation');
+    dispatch({ type: CLEAR_CHATBOT_MESSAGES });
+  } catch (error) {
+    throw handleError(error);
+  }
+};
