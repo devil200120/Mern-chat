@@ -1,26 +1,33 @@
 import React from "react";
 import moment from "moment";
 
-const Group = ({ group, setCurrentGroup, currentGroup }) => {
-  const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
+const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
 
+const Group = ({ group, setCurrentGroup, currentGroup }) => {
   return (
     <div
       onClick={() => setCurrentGroup(group)}
       className={currentGroup?._id === group._id ? "group active" : "group"}
+      role="button"
+      tabIndex={0}
+      onKeyPress={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          setCurrentGroup(group);
+        }
+      }}
     >
       <div className="group-image">
         <div className="image">
           <img
             src={
               group.image 
-                ? `${BACKEND_URL}/image/${group.image}` 
-                : `${BACKEND_URL}/image/default-group.png`
+                ? `${BACKEND_URL}/uploads/${group.image}` 
+                : `${BACKEND_URL}/uploads/default-group.png`
             }
-            alt=""
+            alt={group.name}
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`;
+              e.target.src = `${BACKEND_URL}/uploads/default-profile-picture1.png`;
             }}
           />
         </div>
@@ -29,7 +36,7 @@ const Group = ({ group, setCurrentGroup, currentGroup }) => {
       <div className="group-name">
         <h4>{group.name}</h4>
         <div className="msg-time">
-          <span>{moment(group.updatedAt).startOf("mini").fromNow()}</span>
+          <span>{moment(group.updatedAt).fromNow()}</span>
         </div>
       </div>
     </div>
