@@ -49,6 +49,8 @@ import { googleLogout } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import ChatBot from './ChatBot.jsx';
 import { BsRobot } from 'react-icons/bs';
+const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+const DEFAULT_AVATAR = `${BACKEND_URL}/uploads/default-profile-picture1.png`;
 const Messenger = () => {
   const navigate = useNavigate();
   const [notificationSPlay] = useSound(notificationSound);
@@ -114,7 +116,7 @@ const Messenger = () => {
     "🥴",
     "😱",
   ];
-  const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
+  
 
   // Initialize socket connection ONCE
   useEffect(() => {
@@ -882,7 +884,7 @@ const Messenger = () => {
                 <div className="image-name">
                   <div className="image">
                     <img
-                      src={`${BACKEND_URL}/image/${myInfo?.image}`}
+                      src={`${BACKEND_URL}/uploads/${myInfo?.image}`}
                       alt=""
                       onError={(e) => {
                         e.target.onerror = null;
@@ -1097,7 +1099,7 @@ const Messenger = () => {
                       <div className="image-name">
                         <div className="image">
                           <img
-                            src={`${BACKEND_URL}/image/${
+                            src={`${BACKEND_URL}/uploads/${
                               currentGroup?.image || "default-group.png"
                             }`}
                             alt=""
@@ -1132,7 +1134,7 @@ const Messenger = () => {
                             {msg.senderId !== myInfo?.id && (
                               <div className="image-message-time">
                                 <img
-                                  src={`${BACKEND_URL}/image/default-profile-picture1.png`}
+                                  src={`${BACKEND_URL}/uploads/default-profile-picture1.png`}
                                   alt=""
                                   onError={(e) => {
                                     e.target.onerror = null;
@@ -1148,7 +1150,7 @@ const Messenger = () => {
                                     <p className="message-text">
                                       {msg.message.text === "" ? (
                                         <img
-                                          src={`${BACKEND_URL}/image/${msg.message.image}`}
+                                          src={`${BACKEND_URL}/uploads/${msg.message.image}`}
                                           alt=""
                                           onError={(e) => {
                                             e.target.onerror = null;
@@ -1180,7 +1182,7 @@ const Messenger = () => {
                                     <p className="message-text">
                                       {msg.message.text === "" ? (
                                         <img
-                                          src={`${BACKEND_URL}/image/${msg.message.image}`}
+                                          src={`${BACKEND_URL}/uploads/${msg.message.image}`}
                                           alt=""
                                           onError={(e) => {
                                             e.target.onerror = null;
@@ -1208,9 +1210,7 @@ const Messenger = () => {
                       ) : (
                         <div className="group-welcome">
                           <img
-                            src={`${BACKEND_URL}/image/${
-                              currentGroup?.image || "default-group.png"
-                            }`}
+                            src={`${BACKEND_URL}/uploads/${currentGroup?.image || "default-group.png"}`}
                             alt=""
                             onError={(e) => {
                               e.target.onerror = null;
@@ -1233,10 +1233,7 @@ const Messenger = () => {
                             <div className="fd-message">
                               <div className="image-message-time">
                                 <img
-                                  src={`${BACKEND_URL}/image/${
-                                    groupTypingMessage.senderImage ||
-                                    "default-profile-picture1.png"
-                                  }`}
+                                 {`${BACKEND_URL}/uploads/${groupTypingMessage.senderImage || "default-profile-picture1.png"}`}
                                   alt="typing user"
                                   onError={(e) => {
                                     e.target.onerror = null;
@@ -1326,9 +1323,7 @@ const Messenger = () => {
                     <div className="image-name">
                       <div className="image">
                         <img
-                          src={`${BACKEND_URL}/image/${
-                            currentGroup?.image || "default-group.png"
-                          }`}
+                          src={`${BACKEND_URL}/uploads/${currentGroup?.image || "default-group.png"}`}
                           alt=""
                           onError={(e) => {
                             e.target.onerror = null;
@@ -1353,7 +1348,7 @@ const Messenger = () => {
                             <div key={memberId} className="member">
                               <div className="member-image">
                                 <img
-                                  src={`${BACKEND_URL}/image/${member.fndInfo.image}`}
+                                  src={`${BACKEND_URL}/uploads/${myInfo.image}`}
                                   alt=""
                                   onError={(e) => {
                                     e.target.onerror = null;
@@ -1461,7 +1456,7 @@ const Messenger = () => {
                           />
                           <label htmlFor={`friend-${fd.fndInfo._id}`}>
                             <img
-                              src={`${BACKEND_URL}/image/${fd.fndInfo.image}`}
+                              src={`${BACKEND_URL}/uploads/${fd.fndInfo.image}`}
                               alt=""
                               onError={(e) => {
                                 e.target.onerror = null;
