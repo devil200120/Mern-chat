@@ -3,8 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { FaRegCheckCircle } from "react-icons/fa";
 
-const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
-const DEFAULT_AVATAR = `${BACKEND_URL}/image/default-profile-picture1.png`;
+const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+const DEFAULT_AVATAR = `${BACKEND_URL}/uploads/default-profile-picture1.png`;
 
 const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
   const { myInfo } = useSelector(state => state.auth);
@@ -32,25 +32,30 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
     <img
       src={src}
       alt={alt}
-      onError={e => { e.target.onerror = null; e.target.src = DEFAULT_AVATAR; }}
+      onError={e => { 
+        e.target.onerror = null; 
+        e.target.src = DEFAULT_AVATAR; 
+      }}
       loading="lazy"
     />
   );
 
-  // Use backend URL for all images!
   const renderMessageContent = (m) =>
     m.message.text
       ? m.message.text
-      : renderImage(`${BACKEND_URL}/image/${m.message.image}`);
+      : renderImage(`${BACKEND_URL}/uploads/${m.message.image}`);
 
   const renderStatus = (m) => (
     <div className="message-status">
       {m.status === 'seen' ? (
         <img
           className="status-avatar"
-          src={`${BACKEND_URL}/image/${currentfriend.image}`}
-          alt='Seen'
-          onError={e => { e.target.onerror = null; e.target.src = DEFAULT_AVATAR; }}
+          src={`${BACKEND_URL}/uploads/${currentfriend.image}`}
+          alt={`Seen by ${currentfriend.userName}`}
+          onError={e => { 
+            e.target.onerror = null; 
+            e.target.src = DEFAULT_AVATAR; 
+          }}
         />
       ) : (
         <span className={m.status === 'delivared' ? "status-delivered" : "status-sent"}>
@@ -92,7 +97,10 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
                 className='fd-message'
               >
                 <div className='image-message-time'>
-                  {renderImage(`${BACKEND_URL}/image/${currentfriend.image}`, currentfriend.userName)}
+                  {renderImage(
+                    `${BACKEND_URL}/uploads/${currentfriend.image}`, 
+                    currentfriend.userName
+                  )}
                   <div className='message-time'>
                     <div className='fd-text'>
                       <p className='message-text'>{renderMessageContent(m)}</p>
@@ -105,7 +113,10 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
           })
         ) : (
           <div className='friend_connect'>
-            {renderImage(`${BACKEND_URL}/image/${currentfriend.image}`, currentfriend.userName)}
+            {renderImage(
+              `${BACKEND_URL}/uploads/${currentfriend.image}`, 
+              currentfriend.userName
+            )}
             <h3>{currentfriend.userName} Connect You</h3>
             <span>
               {moment(currentfriend.createdAt).fromNow()}
@@ -119,7 +130,10 @@ const Message = ({ message, currentfriend, scrollRef, typingMessage }) => {
         <div className='typing-message'>
           <div className='fd-message'>
             <div className='image-message-time'>
-              {renderImage(`${BACKEND_URL}/image/${currentfriend.image}`, currentfriend.userName)}
+              {renderImage(
+                `${BACKEND_URL}/uploads/${currentfriend.image}`, 
+                currentfriend.userName
+              )}
               <div className='message-time'>
                 <div className='fd-text'>
                   <p className="message-text typing-animation">
