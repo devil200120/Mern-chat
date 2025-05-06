@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -13,7 +13,6 @@ import Messenger from "./components/Messenger";
 import ProtectRoute from "./components/ProtectRoute";
 import Register from "./components/Register";
 import OAuthCallback from "./components/OAuthCallback";
-import { lazy, Suspense } from 'react';
 
 // Alert configuration
 const alertOptions = {
@@ -47,10 +46,10 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with your actual loading/initialization logic
+    // You can replace this with actual initialization logic if needed
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3500); // Increased to 2.5 seconds to better showcase the animation
+    }, 2500); // 2.5 seconds for loader
 
     return () => clearTimeout(timer);
   }, []);
@@ -69,9 +68,13 @@ function App() {
         <AlertProvider template={AlertTemplate} {...alertOptions}>
           <Routes>
             <Route path="/messenger/login" element={<Login />} />
-            <Route path="/messenger/register" element={<Register />} /> 
+            <Route path="/messenger/register" element={<Register />} />
             <Route path="/oauth-callback" element={<OAuthCallback />} />
-            <Route path="/" element={<ProtectRoute><Messenger /></ProtectRoute>} />
+            <Route path="/" element={
+              <ProtectRoute>
+                <Messenger />
+              </ProtectRoute>
+            } />
           </Routes>
         </AlertProvider>
       </BrowserRouter>
