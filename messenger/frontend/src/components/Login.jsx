@@ -1,79 +1,75 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { userLogin } from "../store/actions/authAction";
 import { useAlert } from "react-alert";
 import { useDispatch, useSelector } from "react-redux";
-import { ERROR_CLEAR, SUCCESS_MESSAGE_CLEAR, USER_LOGIN_SUCCESS } from "../store/types/authType";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import jwt_decode from "jwt-decode";
-
-const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Set this in your .env
+import { userLogin } from "../store/actions/authAction";
+import { ERROR_CLEAR, SUCCESS_MESSAGE_CLEAR } from "../store/types/authType";
 
 const Login = () => {
   const navigate = useNavigate();
   const alert = useAlert();
-  const { loading, authenticate, error, successMessage, myInfo } = useSelector(
-    (state) => state.auth
-  );
   const dispatch = useDispatch();
-
+  const { loading, authenticate, error, successMessage } = useSelector((state) => state.auth);
+  
   const [state, setState] = useState({
     email: "",
     password: "",
   });
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const inputHendle = (e) => {
-    setState({
-      ...state,
-      [e.target.name]: e.target.value,
-    });
+  // Environment variables
+  const backendUrl = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+  const handleInputChange = (e) => {
+    setState({ ...state, [e.target.name]: e.target.value });
   };
 
-  const login = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(userLogin(state));
   };
 
-  // Improved client-side Google login success handler
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const decoded = jwt_decode(credentialResponse.credential);
-      
-      // Store the credential token in localStorage
-      localStorage.setItem("authToken", credentialResponse.credential);
-      
-      // Update Redux state (important for authentication)
-      dispatch({
-        type: USER_LOGIN_SUCCESS,
-        payload: {
-          token: credentialResponse.credential,
-          successMessage: `Google login successful! Welcome, ${decoded.name}`
-        }
+      setIsGoogleLoading(true);
+      const response = await fetch(`${backendUrl}/api/messenger/google`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
       });
+
+      const data = await response.json();
       
-      alert.success("Google login successful! Welcome, " + decoded.name);
-      
-      // Navigate after Redux state update
-      setTimeout(() => navigate("/"), 300);
+      if (!response.ok) throw new Error(data.error || "Google authentication failed");
+
+      localStorage.setItem("authToken", data.token);
+      dispatch({ type: "USER_LOGIN_SUCCESS", payload: data });
+      alert.success(`Welcome ${data.user.userName}`);
+      navigate("/");
+
     } catch (err) {
       console.error("Google login error:", err);
-      alert.error("Google login failed.");
+      alert.error(err.message || "Google login failed");
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
   useEffect(() => {
-    if (authenticate) {
-      navigate("/");
-    }
+    if (authenticate) navigate("/");
     if (successMessage) {
       alert.success(successMessage);
       dispatch({ type: SUCCESS_MESSAGE_CLEAR });
     }
     if (error) {
-      error.map((err) => alert.error(err));
+      Array.isArray(error) ? error.forEach(err => alert.error(err)) : alert.error(error);
       dispatch({ type: ERROR_CLEAR });
     }
-  }, [successMessage, error, authenticate, navigate, alert, dispatch]);
+  }, [authenticate, successMessage, error, navigate, alert, dispatch]);
 
   return (
     <div className="register">
@@ -83,17 +79,17 @@ const Login = () => {
         </div>
 
         <div className="card-body">
-          <form onSubmit={login}>
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <input
                 type="email"
-                onChange={inputHendle}
                 name="email"
                 value={state.email}
+                onChange={handleInputChange}
                 className="form-control"
                 placeholder="Email"
-                id="email"
+                required
               />
             </div>
 
@@ -101,71 +97,55 @@ const Login = () => {
               <label htmlFor="password">Password</label>
               <input
                 type="password"
-                onChange={inputHendle}
                 name="password"
                 value={state.password}
+                onChange={handleInputChange}
                 className="form-control"
                 placeholder="Password"
-                id="password"
+                required
               />
             </div>
 
-            <div className="form-group">
-              <input type="submit" value="login" className="btn" />
-            </div>
+            <button type="submit" className="btn" disabled={loading}>
+              {loading ? "Processing..." : "Login"}
+            </button>
 
-            <div className="form-group">
-              <span>
-                <Link to="/messenger/register"> Don't have any Account </Link>
-              </span>
+            <div className="form-group register-link">
+              <Link to="/messenger/register">Don't have an account?</Link>
             </div>
           </form>
 
-          <div className="google-login-divider" style={{ textAlign: "center", margin: "20px 0" }}>
-            <span>or</span>
-          </div>
+          <div className="oauth-section">
+            <div className="divider">
+              <span>or</span>
+            </div>
 
-          {/* RECOMMENDED: Server-side Google OAuth link */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
+            {/* Recommended Server-side Flow */}
             <a
-              href="https://mern-chat-application-nlxu.onrender.com/api/messenger/google"
-              className="google-signin-link"
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#4285F4",
-                color: "white",
-                borderRadius: "4px",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                fontWeight: "500"
-              }}
+              href={`${backendUrl}/api/messenger/google`}
+              className="google-auth-link"
+              aria-label="Sign in with Google (Recommended)"
             >
-              <img
-                src="https://developers.google.com/identity/images/g-logo.png"
-                alt="Google logo"
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  marginRight: "10px",
-                  backgroundColor: "white",
-                  padding: "2px",
-                  borderRadius: "2px"
-                }}
+              <img 
+                src="https://developers.google.com/identity/images/g-logo.png" 
+                alt="Google logo" 
+                className="google-logo"
               />
-              Sign in with Google (Recommended)
+              Continue with Google (Recommended)
             </a>
-          </div>
 
-          {/* Optional: Client-side Google OAuth fallback */}
-          <div className="google-login-btn" style={{ display: "flex", justifyContent: "center" }}>
-            <GoogleOAuthProvider clientId={clientId}>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => alert.error("Google login failed")}
-                width="100%"
-              />
-            </GoogleOAuthProvider>
+            {/* Client-side Fallback */}
+            <div className="google-client-auth">
+              <GoogleOAuthProvider clientId={clientId}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => alert.error("Google authentication failed")}
+                  width="100%"
+                  disabled={isGoogleLoading}
+                  locale="en-US"
+                />
+              </GoogleOAuthProvider>
+            </div>
           </div>
         </div>
       </div>
