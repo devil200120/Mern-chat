@@ -10,9 +10,21 @@ import {
 } from "../types/authType";
 import jwtDecode from 'jwt-decode';
 
-// Initial state with proper null checks
+// Helper function to safely decode tokens
+const safeDecodeToken = (token) => {
+  try {
+    return jwtDecode(token);
+  } catch (error) {
+    console.error("Token decoding error:", error);
+    localStorage.removeItem('authToken');
+    return null;
+  }
+};
+
+// Initial state with token validation
 const getInitialState = () => {
-  const authState = {
+  const token = localStorage.getItem('authToken');
+  let initialState = {
     loading: true,
     authenticate: false,
     error: null,
@@ -20,31 +32,47 @@ const getInitialState = () => {
     myInfo: null
   };
 
-  try {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      const decoded = jwtDecode(token);
-      
-      if (decoded.exp * 1000 > Date.now()) {
-        return {
-          ...authState,
-          loading: false,
-          authenticate: true,
-          myInfo: decoded
-        };
-      }
-      localStorage.removeItem('authToken');
+  if (token) {
+    const decoded = safeDecodeToken(token);
+    if (decoded && decoded.exp * 1000 > Date.now()) {
+      return {
+        ...initialState,
+        loading: false,
+        authenticate: true,
+        myInfo: decoded
+      };
     }
-  } catch (error) {
-    console.error("Token initialization error:", error);
     localStorage.removeItem('authToken');
   }
-
-  return authState;
+  return initialState;
 };
 
 export const authReducer = (state = getInitialState(), action) => {
   switch (action.type) {
+    case REGISTER_SUCCESS:
+    case USER_LOGIN_SUCCESS: {
+      const { token } = action.payload;
+      if (!token) return state;
+      
+      localStorage.setItem('authToken', token);
+      const decoded = safeDecodeToken(token);
+      
+      return decoded ? {
+        ...state,
+        loading: false,
+        authenticate: true,
+        myInfo: decoded,
+        successMessage: action.payload.successMessage,
+        error: null
+      } : {
+        ...state,
+        loading: false,
+        authenticate: false,
+        myInfo: null,
+        error: ['Invalid authentication token']
+      };
+    }
+
     case REGISTER_FAIL:
     case USER_LOGIN_FAIL:
       return {
@@ -52,49 +80,18 @@ export const authReducer = (state = getInitialState(), action) => {
         loading: false,
         authenticate: false,
         myInfo: null,
-        error: action.payload?.error || 'Authentication failed',
+        error: Array.isArray(action.payload?.error) 
+               ? action.payload.error 
+               : [action.payload?.error || 'Authentication failed'],
         successMessage: null
       };
-
-    case REGISTER_SUCCESS:
-    case USER_LOGIN_SUCCESS:
-      try {
-        const { token, successMessage, user } = action.payload;
-        let decodedUser = user;
-
-        if (token) {
-          localStorage.setItem('authToken', token);
-          decodedUser = jwtDecode(token);
-        }
-
-        return {
-          ...state,
-          loading: false,
-          authenticate: true,
-          myInfo: decodedUser,
-          successMessage: successMessage || 'Authentication successful',
-          error: null
-        };
-
-      } catch (error) {
-        console.error("Authentication error:", error);
-        localStorage.removeItem('authToken');
-        return {
-          ...state,
-          loading: false,
-          authenticate: false,
-          myInfo: null,
-          error: 'Invalid authentication credentials',
-          successMessage: null
-        };
-      }
 
     case SET_USER:
       return {
         ...state,
         loading: false,
-        myInfo: action.payload.user,
         authenticate: true,
+        myInfo: action.payload,
         error: null
       };
 
@@ -103,20 +100,15 @@ export const authReducer = (state = getInitialState(), action) => {
       return {
         ...getInitialState(),
         loading: false,
-        successMessage: 'Logout successful'
-      };
-
-    case SUCCESS_MESSAGE_CLEAR:
-      return {
-        ...state,
+        authenticate: false,
         successMessage: null
       };
 
+    case SUCCESS_MESSAGE_CLEAR:
+      return { ...state, successMessage: null };
+
     case ERROR_CLEAR:
-      return {
-        ...state,
-        error: null
-      };
+      return { ...state, error: null };
 
     default:
       return state;
