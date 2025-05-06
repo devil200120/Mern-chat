@@ -1233,7 +1233,7 @@ const Messenger = () => {
                             <div className="fd-message">
                               <div className="image-message-time">
                                 <img
-                                 {`${BACKEND_URL}/uploads/${groupTypingMessage.senderImage || "default-profile-picture1.png"}`}
+                                 src = {`${BACKEND_URL}/uploads/${groupTypingMessage.senderImage || "default-profile-picture1.png"}`}
                                   alt="typing user"
                                   onError={(e) => {
                                     e.target.onerror = null;
