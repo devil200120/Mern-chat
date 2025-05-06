@@ -43,6 +43,7 @@ require('./config/passport');
 
 // --- Static Files ---
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/image', express.static(path.join(__dirname, '../frontend/public/image')));
 
 
 // --- API Routes ---
