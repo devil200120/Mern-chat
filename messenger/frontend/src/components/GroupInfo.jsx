@@ -1,11 +1,12 @@
 import React from 'react';
-import { FaCaretSquareDown, FaUsers } from "react-icons/fa";
+import { FaCaretSquareDown } from "react-icons/fa";
 import { useSelector } from 'react-redux';
+
+const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
 
 const GroupInfo = ({ currentGroup }) => {
   const { friends } = useSelector(state => state.messenger);
   const { myInfo } = useSelector(state => state.auth);
-  const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com";
 
   const getMemberInfo = (memberId) => {
     if (memberId === myInfo.id) {
@@ -26,19 +27,19 @@ const GroupInfo = ({ currentGroup }) => {
           <img 
             src={
               currentGroup.image 
-                ? `${BACKEND_URL}/image/${currentGroup.image}` 
-                : `${BACKEND_URL}/image/default-group.png`
+                ? `${BACKEND_URL}/uploads/${currentGroup.image}` 
+                : `${BACKEND_URL}/uploads/default-group.png`
             } 
-            alt=''
+            alt={`Group: ${currentGroup.name}`}
             onError={e => { 
               e.target.onerror = null; 
-              e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`; 
+              e.target.src = `${BACKEND_URL}/uploads/default-profile-picture1.png`; 
             }}
           />
         </div>
         <div className='name'>
           <h4>{currentGroup.name}</h4>
-          <h5>{currentGroup.members.length} members</h5>
+          <h5>{currentGroup.members.length} member{currentGroup.members.length !== 1 ? 's' : ''}</h5>
         </div>
       </div>
 
@@ -56,11 +57,11 @@ const GroupInfo = ({ currentGroup }) => {
               <div key={memberId} className='member-item'>
                 <div className='member-image'>
                   <img 
-                    src={`${BACKEND_URL}/image/${member.image}`} 
-                    alt=''
+                    src={`${BACKEND_URL}/uploads/${member.image}`} 
+                    alt={`Profile of ${member.userName}`}
                     onError={e => { 
                       e.target.onerror = null; 
-                      e.target.src = `${BACKEND_URL}/image/default-profile-picture1.png`; 
+                      e.target.src = `${BACKEND_URL}/uploads/default-profile-picture1.png`; 
                     }}
                   />
                 </div>
