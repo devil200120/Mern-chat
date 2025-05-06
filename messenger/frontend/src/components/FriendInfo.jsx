@@ -1,57 +1,69 @@
 import React from 'react';
-import { FaCaretSquareDown, FaEdit, FaSistrix } from "react-icons/fa";
+import { FaCaretSquareDown } from "react-icons/fa";
 
-const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com"
+// Use environment variable or fallback to your Render backend URL
+const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
 
 const FriendInfo = ({ currentfriend, activeUser, message }) => {
+  // Check if current friend is active
+  const isActive = activeUser && activeUser.length > 0 && activeUser.some(u => u.userId === currentfriend._id);
+
+  // Fallback to default image if image fails to load
+  const handleImgError = (e) => {
+    e.target.onerror = null;
+    e.target.src = `${BACKEND_URL}/uploads/default-profile-picture1.png`;
+  };
+
   return (
-    <div className='friend-info'>
+    <aside className='friend-info'>
       <input type="checkbox" id='gallery' />
       <div className='image-name'>
         <div className='image'>
-          <img src={`${BACKEND_URL}/image/${currentfriend.image}`} alt='' />
+          <img
+            src={`${BACKEND_URL}/uploads/${currentfriend.image}`}
+            alt={`Profile of ${currentfriend.userName}`}
+            onError={handleImgError}
+          />
         </div>
-        {
-          activeUser && activeUser.length > 0 && activeUser.some(u => u.userId === currentfriend._id)
-            ? <div className='active-user'>Active</div>
-            : ''
-        }
+        {isActive ? <div className='active-user'>Active</div> : null}
         <div className='name'>
-          <h4>{currentfriend.userName} </h4>
+          <h4>{currentfriend.userName}</h4>
         </div>
       </div>
 
-      <div className='others'>
+      <section className='others'>
         <div className='custom-chat'>
-          <h3>Customise Chat </h3>
+          <h3>Customise Chat</h3>
           <FaCaretSquareDown />
         </div>
-
         <div className='privacy'>
-          <h3>Privacy and Support </h3>
+          <h3>Privacy and Support</h3>
           <FaCaretSquareDown />
         </div>
-
         <div className='media'>
-          <h3>Shared Media </h3>
-          <label htmlFor='gallery'> <FaCaretSquareDown /> </label>
+          <h3>Shared Media</h3>
+          <label htmlFor='gallery' tabIndex={0} aria-label="Show shared media">
+            <FaCaretSquareDown />
+          </label>
         </div>
-      </div>
+      </section>
 
-      <div className='gallery'>
-        {
-          message && message.length > 0
-            ? message.map(
-              (m, index) =>
-                m.message.image && (
-                  <img key={index} src={`${BACKEND_URL}/image/${m.message.image}`} alt="" />
-                )
+      <section className='gallery' aria-label="Shared images">
+        {message && message.length > 0
+          ? message.map((m, index) =>
+              m.message.image ? (
+                <img
+                  key={index}
+                  src={`${BACKEND_URL}/uploads/${m.message.image}`}
+                  alt={`Shared media ${index + 1}`}
+                  onError={handleImgError}
+                />
+              ) : null
             )
-            : ''
-        }
-      </div>
-    </div>
-  )
+          : null}
+      </section>
+    </aside>
+  );
 };
 
 export default FriendInfo;
