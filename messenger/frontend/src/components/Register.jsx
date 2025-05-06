@@ -1,144 +1,213 @@
-import React, { useState,useEffect } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
-import {useDispatch,useSelector} from "react-redux"
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { userRegister } from '../store/actions/authAction';
 import { useAlert } from 'react-alert';
 import { ERROR_CLEAR, SUCCESS_MESSAGE_CLEAR } from '../store/types/authType';
 
+const BACKEND_URL = process.env.REACT_APP_API_URL || 'https://mern-chat-hk3u.onrender.com';
+
 const Register = () => {
+  const navigate = useNavigate();
+  const alert = useAlert();
+  const dispatch = useDispatch();
 
-     const navigate = useNavigate();
-     const alert = useAlert();
+  const { loading, authenticate, error, successMessage } = useSelector(state => state.auth);
 
-     const {loading,authenticate,error,successMessage,myInfo} = useSelector(state=>state.auth);
-     console.log(myInfo);
+  const [state, setState] = useState({
+    userName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    image: null
+  });
 
-     const dispatch = useDispatch();
+  const [loadImage, setLoadImage] = useState('');
 
-     const [state,setstate] = useState({
-          userName : '',
-          email:'',
-          password:'',
-          confirmPassword : '',
-          image : ''
-     })
+  const inputHandle = e => {
+    setState({
+      ...state,
+      [e.target.name]: e.target.value
+    });
+  };
 
-     const [loadImage, setLoadImage] = useState('');
+  const fileHandle = e => {
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setState({
+        ...state,
+        [e.target.name]: file
+      });
 
-     const inputHendle = e => {
-          setstate({
-               ...state,
-               [e.target.name] : e.target.value 
-          })
-     }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setLoadImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-     const fileHendle = e =>{
-          if(e.target.files.length !==0){
-               setstate({
-                    ...state,
-                    [e.target.name] : e.target.files[0]
-               })
-          }
+  const register = e => {
+    e.preventDefault();
+    const { userName, email, password, confirmPassword, image } = state;
 
-          const reader = new FileReader();
-          reader.onload = () => {
-               setLoadImage(reader.result);
-          }
-          reader.readAsDataURL(e.target.files[0]);
-     }
+    // Client-side validation
+    if (!userName.trim() || !email.trim() || !password || !confirmPassword) {
+      alert.error('Please fill in all required fields');
+      return;
+    }
 
-     const register = e =>{
+    if (password !== confirmPassword) {
+      alert.error('Passwords do not match');
+      return;
+    }
 
-          const {userName,email,password,confirmPassword, image} = state;
-          e.preventDefault();
+    const formData = new FormData();
+    formData.append('userName', userName.trim());
+    formData.append('email', email.trim());
+    formData.append('password', password);
+    formData.append('confirmPassword', confirmPassword);
+    if (image) {
+      formData.append('image', image);
+    }
 
-          const formData = new FormData();
+    dispatch(userRegister(formData));
+  };
 
-          formData.append('userName',userName);
-          formData.append('email',email);
-          formData.append('password',password);
-          formData.append('confirmPassword',confirmPassword);
-          formData.append('image',image);
-
-          dispatch(userRegister(formData));          
-     }
-
-     useEffect(()=>{
-          if(authenticate){
-               navigate('/');
-          }
-          if(successMessage){
-               alert.success(successMessage);
-               dispatch({type : SUCCESS_MESSAGE_CLEAR })
-          }
-          if(error){
-               error.map(err=>alert.error(err));
-               dispatch({type : ERROR_CLEAR })
-          }
-
-     },[successMessage,error])
-
+  useEffect(() => {
+    if (authenticate) {
+      navigate('/');
+    }
+    if (successMessage) {
+      alert.success(successMessage);
+      dispatch({ type: SUCCESS_MESSAGE_CLEAR });
+    }
+    if (error) {
+      if (Array.isArray(error)) {
+        error.forEach(err => alert.error(err));
+      } else {
+        alert.error(error);
+      }
+      dispatch({ type: ERROR_CLEAR });
+    }
+  }, [successMessage, error, authenticate, navigate, alert, dispatch]);
 
   return (
-     <div className='register'>
-          <div className='card'>
-               <div className='card-header'>
-          <h3>Register</h3>
-               </div>
+    <div className='register'>
+      <div className='card'>
+        <div className='card-header'>
+          <h3>Create Account</h3>
+        </div>
 
-     <div className='card-body'>
-          <form onSubmit={register}>
-               <div className='form-group'>
-                    <label htmlFor='username'>User Name</label>
-               <input type="text" onChange={inputHendle} name="userName" value={state.userName}  className='form-control' placeholder='User Name' id='username' /> 
-               </div>
+        <div className='card-body'>
+          <form onSubmit={register} noValidate>
+            <div className='form-group'>
+              <label htmlFor='username'>Username</label>
+              <input
+                type='text'
+                onChange={inputHandle}
+                name='userName'
+                value={state.userName}
+                className='form-control'
+                placeholder='Enter username'
+                id='username'
+                required
+                aria-required='true'
+              />
+            </div>
 
-               <div className='form-group'>
-                    <label htmlFor='email'>Email</label>
-               <input type="email" onChange={inputHendle} name="email" value={state.email}  className='form-control' placeholder='Email' id='email' /> 
-               </div>
+            <div className='form-group'>
+              <label htmlFor='email'>Email Address</label>
+              <input
+                type='email'
+                onChange={inputHandle}
+                name='email'
+                value={state.email}
+                className='form-control'
+                placeholder='Enter email'
+                id='email'
+                required
+                aria-required='true'
+              />
+            </div>
 
-               <div className='form-group'>
-                    <label htmlFor='password'>Password</label>
-               <input type="password"  onChange={inputHendle} name="password" value={state.password}  className='form-control' placeholder='Password' id='password' /> 
-               </div>
+            <div className='form-group'>
+              <label htmlFor='password'>Password</label>
+              <input
+                type='password'
+                onChange={inputHandle}
+                name='password'
+                value={state.password}
+                className='form-control'
+                placeholder='Create password'
+                id='password'
+                required
+                minLength='6'
+                aria-required='true'
+              />
+            </div>
 
+            <div className='form-group'>
+              <label htmlFor='confirmPassword'>Confirm Password</label>
+              <input
+                type='password'
+                onChange={inputHandle}
+                name='confirmPassword'
+                value={state.confirmPassword}
+                className='form-control'
+                placeholder='Confirm password'
+                id='confirmPassword'
+                required
+                aria-required='true'
+              />
+            </div>
 
-               <div className='form-group'>
-                    <label htmlFor='confirmPassword'>Confirm Password</label>
-               <input type="password"  onChange={inputHendle} name="confirmPassword" value={state.confirmPassword} className='form-control' placeholder='Confirm Password' id='confirmPassword' /> 
-               </div>
+            <div className='form-group'>
+              <div className='file-image'>
+                <div className='image'>
+                  {loadImage && <img src={loadImage} alt='Profile preview' />}
+                </div>
+                <div className='file'>
+                  <label htmlFor='image' className='btn btn-secondary'>
+                    Upload Profile Image
+                    <input
+                      type='file'
+                      onChange={fileHandle}
+                      name='image'
+                      className='visually-hidden'
+                      id='image'
+                      accept='image/*'
+                      aria-label='Profile image upload'
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
 
-               <div className='form-group'>
-                  <div className='file-image'>
-                         <div className='image'>
-     {loadImage ? <img src={loadImage} alt=''/> : ''  }                         
-                         </div>
-               <div className='file'>
-               <label htmlFor='image'>Select Image</label>
-               <input type="file" onChange={fileHendle}  name="image" className='form-control' id='image' />
-               </div>
+            <div className='form-group'>
+              <button
+                type='submit'
+                className='btn btn-primary'
+                disabled={loading}
+                aria-busy={loading}
+              >
+                {loading ? 'Registering...' : 'Create Account'}
+              </button>
+            </div>
 
-             </div>
-               </div>
-
-               <div className='form-group'>
-               <input type="submit" value="register" className='btn' />
-               </div>
-
-
-               <div className='form-group'>
-     <span><Link to="/messenger/login"> Login Your Account </Link></span>
-               </div>  
-          </form> 
-     </div>
-
-
-               </div> 
-
-     </div>
-
-     )
+            <div className='form-group text-center'>
+              <span className='text-muted'>
+                Already have an account?{' '}
+                <Link to='/messenger/login' className='text-primary'>
+                  Log In
+                </Link>
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Register;
