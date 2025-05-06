@@ -193,7 +193,8 @@ export const messengerReducer = (state = messengerState, action) => {
         message_get_success: false,
         groups: [],
         groupMessages: [],
-        chatbotMessages: []
+        chatbotMessages: [],
+        chatbotMessageSendSuccess: false
       };
 
     case 'NEW_USER_ADD':
