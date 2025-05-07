@@ -222,6 +222,7 @@ export const messengerReducer = (state = messengerState, action) => {
 
   if(type === 'NEW_USER_ADD'){
     return{
+      
       ...state,
       new_user_add: payload.new_user_add
     }
