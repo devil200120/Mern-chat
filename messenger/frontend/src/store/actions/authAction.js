@@ -9,7 +9,7 @@ import {
   SET_USER
 } from "../types/authType";
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://mern-chat-hk3u.onrender.com';
+const API_URL = 'https://mern-chat-hk3u.onrender.com';
 
 // Configure axios instance
 const axiosInstance = axios.create({
