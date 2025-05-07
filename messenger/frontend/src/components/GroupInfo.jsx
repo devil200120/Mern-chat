@@ -2,7 +2,8 @@ import React from 'react';
 import { FaCaretSquareDown } from "react-icons/fa";
 import { useSelector } from 'react-redux';
 
-const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://mern-chat-application-nlxu.onrender.com';
+
 
 const GroupInfo = ({ currentGroup }) => {
   const { friends } = useSelector(state => state.messenger);
