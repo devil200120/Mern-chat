@@ -5,60 +5,88 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const crypto = require('crypto');
 
-// Enhanced user registration with error handling
+// Helper: Unified cookie configuration
+const getCookieOptions = () => ({
+    expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+});
+
+// Helper: Validate password strength
+const isStrongPassword = (password) =>
+    validator.isStrongPassword(password, {
+        minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1
+    });
+
+// Registration Controller
 module.exports.userRegister = (req, res) => {
-    const form = formidable();
+    const form = formidable({ multiples: false, maxFileSize: 2 * 1024 * 1024 }); // 2MB limit
     form.parse(req, async (err, fields, files) => {
         try {
             const { userName, email, password, confirmPassword } = fields;
-            const { image } = files;
             const errors = [];
 
-            // Validation checks
-            if (!userName) errors.push('Please provide your user name');
-            if (!email) errors.push('Please provide your Email');
-            if (email && !validator.isEmail(email)) errors.push('Please provide a valid Email');
-            if (!password) errors.push('Please provide your Password');
-            if (!confirmPassword) errors.push('Please provide your confirm Password');
-            if (password && confirmPassword && password !== confirmPassword) errors.push('Passwords do not match');
-            if (password && password.length < 6) errors.push('Password must be at least 6 characters');
-            if (!files.image) errors.push('Please provide user image');
+            // Basic validations
+            if (!userName || !email || !password || !confirmPassword)
+                errors.push('All fields are required');
+            if (email && !validator.isEmail(email))
+                errors.push('Please provide a valid Email');
+            if (password && confirmPassword && password !== confirmPassword)
+                errors.push('Passwords do not match');
+            if (password && !isStrongPassword(password))
+                errors.push('Password must be at least 8 characters and include uppercase, lowercase, number, and symbol');
+
+            // Image validation
+            const image = files.image;
+            if (!image)
+                errors.push('Please provide a user image');
+            else {
+                const allowedMimeTypes = ['image/jpeg', 'image/png'];
+                if (!allowedMimeTypes.includes(image.mimetype))
+                    errors.push('Invalid image type. Only JPEG and PNG allowed.');
+                if (image.size > 2 * 1024 * 1024)
+                    errors.push('Image size must be less than 2MB');
+            }
 
             if (errors.length > 0) {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     success: false,
-                    errors: { errorMessage: errors } 
+                    errors: { errorMessage: errors }
                 });
             }
 
-            // Image handling
-            const getImageName = files.image.originalFilename;
-            const randNumber = Math.floor(Math.random() * 99999);
-            const newImageName = randNumber + getImageName;
-            const newPath = path.join(__dirname, '../uploads/', newImageName);
-
-            // Check existing user
+            // Check if user exists
             const existingUser = await registerModel.findOne({ email });
             if (existingUser) {
-                return res.status(409).json({ 
+                return res.status(409).json({
                     success: false,
                     errors: { errorMessage: ['Email already exists'] }
                 });
             }
 
-            // File operations
-            await fs.promises.copyFile(files.image.filepath, newPath);
+            // Generate secure random filename
+            const ext = path.extname(image.originalFilename);
+            const newImageName = crypto.randomBytes(16).toString('hex') + ext;
+            const newPath = path.join(__dirname, '../uploads/', newImageName);
 
-            // User creation
+            // Save image
+            await fs.promises.copyFile(image.filepath, newPath);
+
+            // Hash password
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Create user
             const user = await registerModel.create({
                 userName,
                 email,
-                password: await bcrypt.hash(password, 10),
+                password: hashedPassword,
                 image: newImageName
             });
 
-            // JWT token generation
+            // JWT token
             const token = jwt.sign({
                 id: user._id,
                 email: user.email,
@@ -67,67 +95,58 @@ module.exports.userRegister = (req, res) => {
                 registerTime: user.createdAt
             }, process.env.SECRET, { expiresIn: process.env.TOKEN_EXP });
 
-            // Cookie configuration
-            const cookieOptions = {
-                expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000),
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
-            };
-
             res.status(201)
-                .cookie('authToken', token, cookieOptions)
-                .json({ 
+                .cookie('authToken', token, getCookieOptions())
+                .json({
                     success: true,
                     message: 'Registration successful',
-                    token 
+                    token
                 });
 
         } catch (error) {
             console.error('Registration error:', error);
-            res.status(500).json({ 
+            res.status(500).json({
                 success: false,
-                errors: { errorMessage: ['Internal server error'] } 
+                errors: { errorMessage: ['Internal server error'] }
             });
         }
     });
 };
 
-// Improved login controller
+// Login Controller
 module.exports.userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         const errors = [];
 
-        if (!email) errors.push('Please provide your Email');
-        if (!password) errors.push('Please provide your Password');
-        if (email && !validator.isEmail(email)) errors.push('Please provide a valid Email');
+        if (!email || !password)
+            errors.push('Email and password are required');
+        if (email && !validator.isEmail(email))
+            errors.push('Please provide a valid Email');
 
         if (errors.length > 0) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                errors: { errorMessage: errors } 
+                errors: { errorMessage: errors }
             });
         }
 
         const user = await registerModel.findOne({ email }).select('+password');
-        
         if (!user) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                errors: { errorMessage: ['User not found'] } 
+                errors: { errorMessage: ['User not found'] }
             });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ 
+            return res.status(401).json({
                 success: false,
-                errors: { errorMessage: ['Invalid credentials'] } 
+                errors: { errorMessage: ['Invalid credentials'] }
             });
         }
 
-        // JWT token generation
         const token = jwt.sign({
             id: user._id,
             email: user.email,
@@ -136,53 +155,37 @@ module.exports.userLogin = async (req, res) => {
             registerTime: user.createdAt
         }, process.env.SECRET, { expiresIn: process.env.TOKEN_EXP });
 
-        // Cookie configuration
-        const cookieOptions = {
-            expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000),
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        };
-
         res.status(200)
-            .cookie('authToken', token, cookieOptions)
-            .json({ 
+            .cookie('authToken', token, getCookieOptions())
+            .json({
                 success: true,
                 message: 'Login successful',
-                token 
+                token
             });
 
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            errors: { errorMessage: ['Internal server error'] } 
+            errors: { errorMessage: ['Internal server error'] }
         });
     }
 };
 
-// Fixed logout controller
+// Logout Controller
 module.exports.userLogout = (req, res) => {
     try {
-        // Clear cookie with same options used for setting
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
-        };
-
         res.status(200)
-            .clearCookie('authToken', cookieOptions)
+            .clearCookie('authToken', getCookieOptions())
             .json({
                 success: true,
                 message: 'Logout successful'
             });
-
     } catch (error) {
         console.error('Logout error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            errors: { errorMessage: ['Logout failed'] } 
+            errors: { errorMessage: ['Logout failed'] }
         });
     }
 };
