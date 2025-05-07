@@ -8,6 +8,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Set this in your .env
+const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-application-nlxu.onrender.com/api/messenger";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -125,10 +126,10 @@ const Login = () => {
             <span>or</span>
           </div>
 
-          {/* RECOMMENDED: Server-side Google OAuth link */}
+          {/* Corrected: Use backend URL for Google OAuth */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
             <a
-              href="http://localhost:5000/api/messenger/google"
+              href={`${BACKEND_URL}/google`}
               className="google-signin-link"
               style={{
                 padding: "10px 20px",
