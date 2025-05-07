@@ -16,7 +16,7 @@ export const userRegister = (data) => {
         headers: { 'Content-Type': 'application/json' }
       };
 
-      const response = await axios.post('/api/messenger/user-register', data, config);
+      const response = await axios.post('https://mern-chat-application-nlxu.onrender.com/api/messenger/user-register', data, config);
       localStorage.setItem('authToken', response.data.token);
 
       dispatch({
@@ -45,7 +45,7 @@ export const userLogin = (data) => {
         headers: { 'Content-Type': 'application/json' }
       };
 
-      const response = await axios.post('/api/messenger/user-login', data, config);
+      const response = await axios.post('https://mern-chat-application-nlxu.onrender.com/api/messenger/user-login', data, config);
       localStorage.setItem('authToken', response.data.token);
 
       dispatch({
@@ -87,7 +87,7 @@ export const googleLogin = (token) => {
 // Logout
 export const userLogout = () => async (dispatch) => {
   try {
-    const response = await axios.post('/api/messenger/user-logout');
+    const response = await axios.post('https://mern-chat-application-nlxu.onrender.com/api/messenger/user-logout');
     if (response.data.success) {
       localStorage.removeItem('authToken');
       dispatch({
