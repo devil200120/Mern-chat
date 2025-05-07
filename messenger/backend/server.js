@@ -18,7 +18,8 @@ const allowedOrigins = [
   "http://localhost:8000",
   
   "http://127.0.0.1:8000",
-  "https://mern-chat-hk3u.onrender.com"
+  "https://mern-chat-hk3u.onrender.com",
+  "https://mern-chat-application-nlxu.onrender.com"
 ];
 
 // --- Middlewares ---
