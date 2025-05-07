@@ -4,7 +4,7 @@ import FriendInfo from './FriendInfo';
 import Message from './Message';
 import MessageSend from './MessageSend';
 
-const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+const BACKEND_URL = "https://mern-chat-application-nlxu.onrender.com"
 
 const RightSide = (props) => {
   const {
