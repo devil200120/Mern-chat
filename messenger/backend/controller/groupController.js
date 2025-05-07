@@ -2,10 +2,16 @@ const Group = require('../models/groupModel');
 const Message = require('../models/messageModel');
 const formidable = require('formidable');
 const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 // Create a new group
 exports.createGroup = async (req, res) => {
-  const form = formidable();
+  const form = formidable({
+    maxFileSize: 5 * 1024 * 1024, // 5MB limit
+    keepExtensions: true
+  });
+  
   form.parse(req, async (err, fields, files) => {
     const { name, members } = fields;
     const admin = req.myId;
@@ -35,20 +41,21 @@ exports.createGroup = async (req, res) => {
       
       // Handle image upload
       if (files && files.image) {
-        const getImageName = files.image.originalFilename;
-        const randNumber = Math.floor(Math.random() * 99999);
-        newImageName = randNumber + getImageName;
-        const newPath = __dirname + `../../../frontend/public/image/${newImageName}`;
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(files.image.mimetype)) {
+          return res.status(400).json({
+            error: { errorMessage: ['Invalid file type. Only JPEG, PNG, and GIF are allowed'] }
+          });
+        }
         
-        fs.copyFile(files.image.filepath, newPath, async (error) => {
-          if (error) {
-            return res.status(500).json({
-              error: { errorMessage: ['Image upload failed'] }
-            });
-          }
-          
-          saveGroup();
-        });
+        const getImageName = files.image.originalFilename;
+        const randNumber = crypto.randomBytes(8).toString('hex');
+        newImageName = randNumber + getImageName;
+        const newPath = path.join(__dirname, '../uploads/', newImageName);
+        
+        await fs.promises.copyFile(files.image.filepath, newPath);
+        saveGroup();
       } else {
         saveGroup();
       }
@@ -83,7 +90,9 @@ exports.createGroup = async (req, res) => {
 // Get all groups for the current user
 exports.getGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ members: { $in: [req.myId] } });
+    const groups = await Group.find({ members: { $in: [req.myId] } })
+      .sort('-createdAt');
+    
     res.status(200).json({
       success: true,
       groups
@@ -99,6 +108,15 @@ exports.getGroups = async (req, res) => {
 exports.getGroupMessages = async (req, res) => {
   try {
     const groupId = req.params.id;
+    
+    // Check if user is a member of the group
+    const group = await Group.findById(groupId);
+    if (!group || !group.members.includes(req.myId)) {
+      return res.status(403).json({
+        error: { errorMessage: ['You are not a member of this group'] }
+      });
+    }
+    
     const messages = await Message.find({ groupId });
     
     res.status(200).json({
@@ -156,7 +174,10 @@ exports.sendGroupMessage = async (req, res) => {
 // Send an image message to a group
 exports.sendGroupImageMessage = async (req, res) => {
   const senderId = req.myId;
-  const form = formidable();
+  const form = formidable({
+    maxFileSize: 5 * 1024 * 1024, // 5MB limit
+    keepExtensions: true
+  });
   
   form.parse(req, async (err, fields, files) => {
     const { senderName, groupId, imageName } = fields;
@@ -170,37 +191,45 @@ exports.sendGroupImageMessage = async (req, res) => {
         });
       }
       
-      const newPath = __dirname + `../../../frontend/public/image/${imageName}`;
+      // Validate file type
+      if (!files.image) {
+        return res.status(400).json({
+          error: { errorMessage: ['No image was uploaded'] }
+        });
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(files.image.mimetype)) {
+        return res.status(400).json({
+          error: { errorMessage: ['Invalid file type. Only JPEG, PNG, and GIF are allowed'] }
+        });
+      }
+      
+      const newPath = path.join(__dirname, '../uploads/', imageName);
       files.image.originalFilename = imageName;
       
-      fs.copyFile(files.image.filepath, newPath, async (error) => {
-        if (error) {
-          return res.status(500).json({
-            error: { errorMessage: ['Image upload failed'] }
-          });
-        }
+      await fs.promises.copyFile(files.image.filepath, newPath);
+      
+      try {
+        const newMessage = await Message.create({
+          senderId,
+          senderName,
+          groupId,
+          message: {
+            text: '',
+            image: files.image.originalFilename
+          }
+        });
         
-        try {
-          const newMessage = await Message.create({
-            senderId,
-            senderName,
-            groupId,
-            message: {
-              text: '',
-              image: files.image.originalFilename
-            }
-          });
-          
-          res.status(201).json({
-            success: true,
-            message: newMessage
-          });
-        } catch (err) {
-          res.status(500).json({
-            error: { errorMessage: ['Internal Server Error'] }
-          });
-        }
-      });
+        res.status(201).json({
+          success: true,
+          message: newMessage
+        });
+      } catch (err) {
+        res.status(500).json({
+          error: { errorMessage: ['Internal Server Error'] }
+        });
+      }
     } catch (err) {
       res.status(500).json({
         error: { errorMessage: ['Internal Server Error'] }
