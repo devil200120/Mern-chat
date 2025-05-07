@@ -1,171 +1,179 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { userLogin } from "../store/actions/authAction";
 import { useAlert } from "react-alert";
 import { useDispatch, useSelector } from "react-redux";
-import { ERROR_CLEAR, SUCCESS_MESSAGE_CLEAR, USER_LOGIN_SUCCESS } from "../store/types/authType";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import jwt_decode from "jwt-decode";
+import { GoogleLogin } from "@react-oauth/google";
+import { userLogin } from "../store/actions/authAction";
+import {
+  ERROR_CLEAR,
+  SUCCESS_MESSAGE_CLEAR,
+  USER_LOGIN_SUCCESS
+} from "../store/types/authType";
 
-const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Set this in your .env
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const Login = () => {
   const navigate = useNavigate();
   const alert = useAlert();
-  const { loading, authenticate, error, successMessage, myInfo } = useSelector(
+  const dispatch = useDispatch();
+  const { loading, authenticate, error, successMessage } = useSelector(
     (state) => state.auth
   );
-  const dispatch = useDispatch();
 
-  const [state, setState] = useState({
+  const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   });
 
-  const inputHendle = (e) => {
-    setState({
-      ...state,
+  const handleInputChange = (e) => {
+    setCredentials({
+      ...credentials,
       [e.target.name]: e.target.value,
     });
   };
 
-  const login = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(userLogin(state));
+    dispatch(userLogin(credentials));
   };
 
-  // Improved client-side Google login success handler
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const decoded = jwt_decode(credentialResponse.credential);
+      const response = await fetch(`${BACKEND_URL}/api/messenger/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Google login failed");
+      }
+
+      localStorage.setItem("authToken", data.token);
       
-      // Store the credential token in localStorage
-      localStorage.setItem("authToken", credentialResponse.credential);
-      
-      // Update Redux state (important for authentication)
       dispatch({
         type: USER_LOGIN_SUCCESS,
         payload: {
-          token: credentialResponse.credential,
-          successMessage: `Google login successful! Welcome, ${decoded.name}`
-        }
+          token: data.token,
+          user: data.user,
+          successMessage: `Welcome, ${data.user.userName}!`,
+        },
       });
-      
-      alert.success("Google login successful! Welcome, " + decoded.name);
-      
-      // Navigate after Redux state update
-      setTimeout(() => navigate("/"), 300);
-    } catch (err) {
-      console.error("Google login error:", err);
-      alert.error("Google login failed.");
+
+      alert.success(`Welcome back, ${data.user.userName}!`);
+      navigate("/");
+
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert.error(error.message || "Google authentication failed");
     }
   };
 
   useEffect(() => {
-    if (authenticate) {
-      navigate("/");
-    }
+    if (authenticate) navigate("/");
     if (successMessage) {
       alert.success(successMessage);
       dispatch({ type: SUCCESS_MESSAGE_CLEAR });
     }
     if (error) {
-      error.map((err) => alert.error(err));
+      error.forEach((err) => alert.error(err));
       dispatch({ type: ERROR_CLEAR });
     }
   }, [successMessage, error, authenticate, navigate, alert, dispatch]);
 
   return (
-    <div className="register">
-      <div className="card">
-        <div className="card-header">
-          <h3>Login</h3>
-        </div>
+    <div className="auth-container">
+      <div className="auth-card">
+        <header className="auth-header">
+          <h2>Welcome Back</h2>
+          <p>Sign in to continue</p>
+        </header>
 
-        <div className="card-body">
-          <form onSubmit={login}>
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                onChange={inputHendle}
-                name="email"
-                value={state.email}
-                className="form-control"
-                placeholder="Email"
-                id="email"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                onChange={inputHendle}
-                name="password"
-                value={state.password}
-                className="form-control"
-                placeholder="Password"
-                id="password"
-              />
-            </div>
-
-            <div className="form-group">
-              <input type="submit" value="login" className="btn" />
-            </div>
-
-            <div className="form-group">
-              <span>
-                <Link to="/messenger/register"> Don't have any Account </Link>
-              </span>
-            </div>
-          </form>
-
-          <div className="google-login-divider" style={{ textAlign: "center", margin: "20px 0" }}>
-            <span>or</span>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              value={credentials.email}
+              onChange={handleInputChange}
+              required
+              autoComplete="username"
+              className="form-input"
+            />
           </div>
 
-          {/* RECOMMENDED: Server-side Google OAuth link */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "15px" }}>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              value={credentials.password}
+              onChange={handleInputChange}
+              required
+              autoComplete="current-password"
+              className="form-input"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="primary-btn"
+            disabled={loading}
+            aria-label="Sign in"
+          >
+            {loading ? (
+              <div className="spinner" aria-hidden="true"></div>
+            ) : (
+              "Sign In"
+            )}
+          </button>
+
+          <div className="auth-alternative">
+            <span>Don't have an account? </span>
+            <Link to="/messenger/register" className="auth-link">
+              Create Account
+            </Link>
+          </div>
+        </form>
+
+        <div className="oauth-section">
+          <div className="oauth-divider">
+            <span>Or continue with</span>
+          </div>
+
+          <div className="oauth-providers">
             <a
-              href="http://localhost:5000/api/messenger/google"
-              className="google-signin-link"
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#4285F4",
-                color: "white",
-                borderRadius: "4px",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                fontWeight: "500"
-              }}
+              href={`${BACKEND_URL}/api/messenger/google`}
+              className="google-auth-btn"
+              aria-label="Sign in with Google (Server-side)"
             >
               <img
-                src="https://developers.google.com/identity/images/g-logo.png"
+                src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_32dp.png"
                 alt="Google logo"
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  marginRight: "10px",
-                  backgroundColor: "white",
-                  padding: "2px",
-                  borderRadius: "2px"
-                }}
+                className="provider-logo"
               />
-              Sign in with Google (Recommended)
+              Sign in with Google
             </a>
-          </div>
 
-          {/* Optional: Client-side Google OAuth fallback */}
-          <div className="google-login-btn" style={{ display: "flex", justifyContent: "center" }}>
-            <GoogleOAuthProvider clientId={clientId}>
+            <div className="client-oauth-fallback">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => alert.error("Google login failed")}
-                width="100%"
+                useOneTap
+                width="300"
+                locale="en-US"
+                theme="filled_blue"
+                shape="rectangular"
+                size="large"
+                text="continue_with"
               />
-            </GoogleOAuthProvider>
+            </div>
           </div>
         </div>
       </div>
