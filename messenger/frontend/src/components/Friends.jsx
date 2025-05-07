@@ -3,7 +3,8 @@ import moment from 'moment';
 import { FaRegCheckCircle } from "react-icons/fa";
 
 // Use environment variable for backend URL, fallback to your Render URL
-const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://mern-chat-application-nlxu.onrender.com';
+
 
 const Friends = (props) => {
   const { fndInfo, msgInfo } = props.friend;
