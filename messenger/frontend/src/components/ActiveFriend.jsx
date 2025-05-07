@@ -1,7 +1,7 @@
 import React from "react";
 
 const ActiveFriend = ({ user, setCurrentFriend }) => {
-  const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+  const BACKEND_URL =  "https://mern-chat-hk3u.onrender.com";
 
   const handleImageError = (e) => {
     e.target.onerror = null; // Prevent infinite loop
