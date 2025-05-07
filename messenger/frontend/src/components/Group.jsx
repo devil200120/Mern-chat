@@ -1,7 +1,8 @@
 import React from "react";
 import moment from "moment";
 
-const BACKEND_URL = process.env.REACT_APP_API_URL || "https://mern-chat-hk3u.onrender.com";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://mern-chat-application-nlxu.onrender.com';
+
 
 const Group = ({ group, setCurrentGroup, currentGroup }) => {
   return (
