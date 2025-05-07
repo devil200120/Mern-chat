@@ -17,7 +17,7 @@ import {
 } from "../types/messengerType";
 
 // API base URL (use environment variable or fallback)
-const API_URL = process.env.REACT_APP_API_URL || 'https://mern-chat-hk3u.onrender.com';
+const API_URL =  'https://mern-chat-hk3u.onrender.com';
 
 // Axios instance with credentials and token support
 const axiosInstance = axios.create({
