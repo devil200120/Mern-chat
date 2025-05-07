@@ -194,7 +194,7 @@ socket.on('sendChatbotMessage', async (data) => {
     
     // Make internal HTTP request to chatbot API
     const axios = require('axios');
-    const response = await axios.post(`http://localhost:${process.env.PORT || 5000}/api/messenger/chatbot/send-message`, 
+    const response = await axios.post('https://mern-chat-application-nlxu.onrender.com/api/messenger/chatbot/send-message', 
       { message },
       { 
         headers: { 
