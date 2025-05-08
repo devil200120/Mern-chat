@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 
+
 // Enhanced user registration with error handling
 module.exports.userRegister = (req, res) => {
     const form = formidable();
