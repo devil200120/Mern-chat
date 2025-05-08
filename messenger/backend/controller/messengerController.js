@@ -2,6 +2,7 @@ const User = require('../models/authModel');
 const messageModel = require('../models/messageModel');
 const formidable = require('formidable');
 const fs = require('fs');
+const path = require('path');
 
 
 const getLastMessage = async(myId, fdId) => {
@@ -158,7 +159,7 @@ module.exports.ImageMessageSend = (req,res) => {
               imageName 
           } = fields;
 
-          const newPath = __dirname + `../../../frontend/public/image/${imageName}`
+          const newPath = path.join(__dirname, '../../uploads');
           files.image.originalFilename = imageName;
 
           try{
